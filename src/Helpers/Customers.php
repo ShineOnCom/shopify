@@ -10,7 +10,7 @@ use Dan\Shopify\Exceptions\InvalidOrMissingEndpointException;
  */
 class Customers extends Endpoint
 {
-    protected function ensureGraphQLSupport(): void
+    public function ensureGraphQLSupport(): void
 	{
 		if (config('shopify.endpoints.customers')) {
             throw new GraphQLEnabledWithMissingQueriesException(self::GRAPHQL_NOT_SUPPORTED_YET_ERROR);

@@ -2,6 +2,7 @@
 
 namespace Dan\Shopify\Test;
 
+use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
 use Dan\Shopify\Shopify;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -28,5 +29,13 @@ class ShopApiTest extends TestCase
                 && $request->method() == 'GET'
                 && $request->hasHeader('X-Shopify-Access-Token', 'token');
         });
+    }
+
+    public function test_throws_when_graphql_is_enabled_but_endpoint_does_not_support_graphql_yet()
+    {
+        config(['shopify.endpoints.assets' => 1]);
+        $this->expectException(GraphQLEnabledWithMissingQueriesException::class);
+
+        (new Shopify('shop', 'token'))->assets->get();
     }
 }

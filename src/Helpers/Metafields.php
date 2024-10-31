@@ -7,7 +7,7 @@ use Dan\Shopify\Shopify;
 
 class Metafields extends Endpoint
 {
-	protected function ensureGraphQLSupport(): void
+	public function ensureGraphQLSupport(): void
 	{
 		if (config('shopify.endpoints.metafields')) {
             throw new GraphQLEnabledWithMissingQueriesException(self::GRAPHQL_NOT_SUPPORTED_YET_ERROR);

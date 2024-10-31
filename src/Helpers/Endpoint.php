@@ -119,7 +119,7 @@ abstract class Endpoint
      * @return bool
      * @throws GraphQLEnabledWithMissingQueriesException
      */
-    protected function ensureGraphQLSupport(): void
+    public function ensureGraphQLSupport(): void
     {
     }
 }
