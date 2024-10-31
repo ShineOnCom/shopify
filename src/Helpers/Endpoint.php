@@ -42,8 +42,6 @@ abstract class Endpoint
     /** @var Shopify $client */
     protected $client;
 
-    public const GRAPHQL_NOT_SUPPORTED_YET_ERROR = 'GraphQL is enabled for this endpoint but is currently not supported in this version.';
-
     /**
      * Endpoint constructor.
      *

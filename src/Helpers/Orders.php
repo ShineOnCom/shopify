@@ -12,7 +12,7 @@ class Orders extends Endpoint
     public function ensureGraphQLSupport(): void
     {
         if (config('shopify.endpoints.orders')) {
-            throw new GraphQLEnabledWithMissingQueriesException(self::GRAPHQL_NOT_SUPPORTED_YET_ERROR);
+            throw new GraphQLEnabledWithMissingQueriesException();
         }
     }
 }
