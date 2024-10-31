@@ -3,6 +3,7 @@
 namespace Dan\Shopify\Helpers;
 
 use BadMethodCallException;
+use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
 use Dan\Shopify\Models\AbstractModel;
 use Dan\Shopify\Models\Asset;
 
@@ -11,6 +12,13 @@ use Dan\Shopify\Models\Asset;
  */
 class Assets extends Endpoint
 {
+    protected function ensureGraphQLSupport(): void
+	{
+		if (config('shopify.endpoints.assets')) {
+            throw new GraphQLEnabledWithMissingQueriesException(self::GRAPHQL_NOT_SUPPORTED_YET_ERROR);
+        }
+	}
+
     /**
      * Get data using the `assets` endpoint.
      *

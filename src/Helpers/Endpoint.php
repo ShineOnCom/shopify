@@ -2,6 +2,7 @@
 
 namespace Dan\Shopify\Helpers;
 
+use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
 use Dan\Shopify\Exceptions\InvalidOrMissingEndpointException;
 use Dan\Shopify\Shopify;
 
@@ -40,6 +41,8 @@ abstract class Endpoint
 
     /** @var Shopify $client */
     protected $client;
+
+    public const GRAPHQL_NOT_SUPPORTED_YET_ERROR = 'GraphQL is enabled for this endpoint but is currently not supported in this version.';
 
     /**
      * Endpoint constructor.
@@ -107,5 +110,16 @@ abstract class Endpoint
         }
 
         return $this->client->$method(...$parameters);
+    }
+
+    /**
+     * All classes that extends Endpoint is expected to override this method to decide if they currently support GraphQL
+     * They only need to support graphQL if the consumer configures GraphQL support based on config.shopify.endpoints
+     *
+     * @return bool
+     * @throws GraphQLEnabledWithMissingQueriesException
+     */
+    protected function ensureGraphQLSupport(): void
+    {
     }
 }
