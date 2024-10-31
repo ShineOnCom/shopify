@@ -7,11 +7,11 @@ use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
 class FulfillmentOrders extends Endpoint
 {
     public function ensureGraphQLSupport(): void
-	{
-		if (config('shopify.endpoints.fulfillment_orders')) {
+    {
+        if (config('shopify.endpoints.fulfillment_orders')) {
             throw new GraphQLEnabledWithMissingQueriesException(self::GRAPHQL_NOT_SUPPORTED_YET_ERROR);
         }
-	}
+    }
 
     /**
      * Accept a fulfillment request.

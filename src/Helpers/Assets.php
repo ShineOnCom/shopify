@@ -13,11 +13,11 @@ use Dan\Shopify\Models\Asset;
 class Assets extends Endpoint
 {
     public function ensureGraphQLSupport(): void
-	{
-		if (config('shopify.endpoints.assets')) {
+    {
+        if (config('shopify.endpoints.assets')) {
             throw new GraphQLEnabledWithMissingQueriesException(self::GRAPHQL_NOT_SUPPORTED_YET_ERROR);
         }
-	}
+    }
 
     /**
      * Get data using the `assets` endpoint.

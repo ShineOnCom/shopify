@@ -9,10 +9,10 @@ use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
  */
 class Disputes extends Endpoint
 {
-	public function ensureGraphQLSupport(): void
-	{
-		if (config('shopify.endpoints.disputes')) {
+    public function ensureGraphQLSupport(): void
+    {
+        if (config('shopify.endpoints.disputes')) {
             throw new GraphQLEnabledWithMissingQueriesException(self::GRAPHQL_NOT_SUPPORTED_YET_ERROR);
         }
-	}
+    }
 }
