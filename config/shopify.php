@@ -113,4 +113,26 @@ return [
             'themes/update'              => Dan\Shopify\Integrations\Laravel\Events\WebhookEvent::class,
         ],
     ],
+
+    'endpoints' => [
+        'assets'                        => (int) env('SHOPIFY_ENDPOINT_ASSETS_USE_GRAPHQL', 0),
+        'assigned_fulfillment_orders'   => (int) env('SHOPIFY_ENDPOINT_ASSIGNED_FULFILLMENT_ORDERS_USE_GRAPHQL', 0),
+        'customers'                     => (int) env('SHOPIFY_ENDPOINT_CUSTOMERS_USE_GRAPHQL', 0),
+        'discount_codes'                => (int) env('SHOPIFY_ENDPOINT_DISCOUNT_CODES_USE_GRAPHQL', 0),
+        'disputes'                      => (int) env('SHOPIFY_ENDPOINT_DISPUTES_USE_GRAPHQL', 0),
+        'fulfillments'                  => (int) env('SHOPIFY_ENDPOINT_FULFILLMENTS_USE_GRAPHQL', 0),
+        'fulfillment_orders'            => (int) env('SHOPIFY_ENDPOINT_FULFILLMENT_ORDERS_USE_GRAPHQL', 0),
+        'fulfillment_services'          => (int) env('SHOPIFY_ENDPOINT_FULFILLMENT_SERVICES_USE_GRAPHQL', 0),
+        'images'                        => (int) env('SHOPIFY_ENDPOINT_IMAGES_USE_GRAPHQL', 0),
+        'metafields'                    => (int) env('SHOPIFY_ENDPOINT_METAFIELDS_USE_GRAPHQL', 0),
+        'orders'                        => (int) env('SHOPIFY_ENDPOINT_ORDERS_USE_GRAPHQL', 0),
+        'price_rules'                   => (int) env('SHOPIFY_ENDPOINT_PRICE_RULES_USE_GRAPHQL', 0),
+        'products'                      => (int) env('SHOPIFY_ENDPOINT_PRODUCTS_USE_GRAPHQL', 0),
+        'recurring_application_charges' => (int) env('SHOPIFY_ENDPOINT_RECURRING_APPLICATION_CHARGES_USE_GRAPHQL', 0),
+        'risks'                         => (int) env('SHOPIFY_ENDPOINT_RISKS_USE_GRAPHQL', 0),
+        'smart_collections'             => (int) env('SHOPIFY_ENDPOINT_SMART_COLLECTIONS_USE_GRAPHQL', 0),
+        'themes'                        => (int) env('SHOPIFY_ENDPOINT_THEMES_USE_GRAPHQL', 0),
+        'variants'                      => (int) env('SHOPIFY_ENDPOINT_VARIANTS_USE_GRAPHQL', 0),
+        'webhooks'                      => (int) env('SHOPIFY_ENDPOINT_WEBHOOKS_USE_GRAPHQL', 0),
+    ]
 ];

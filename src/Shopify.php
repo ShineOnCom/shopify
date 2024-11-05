@@ -856,7 +856,10 @@ class Shopify
         $className = "Dan\Shopify\\Helpers\\".Util::studly($endpoint);
 
         if (class_exists($className)) {
-            return new $className($this);
+            $classInstance = new $className($this);
+            $classInstance->ensureGraphQLSupport();
+
+            return $classInstance;
         }
 
         // If user tries to access property that doesn't exist, scold them.

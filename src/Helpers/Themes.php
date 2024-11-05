@@ -2,6 +2,8 @@
 
 namespace Dan\Shopify\Helpers;
 
+use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
+
 /**
  * Class Themes.
  *
@@ -9,4 +11,10 @@ namespace Dan\Shopify\Helpers;
  */
 class Themes extends Endpoint
 {
+    public function ensureGraphQLSupport(): void
+    {
+        if (config('shopify.endpoints.themes')) {
+            throw new GraphQLEnabledWithMissingQueriesException();
+        }
+    }
 }

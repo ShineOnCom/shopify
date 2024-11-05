@@ -2,6 +2,7 @@
 
 namespace Dan\Shopify\Helpers;
 
+use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
 use Dan\Shopify\Exceptions\InvalidOrMissingEndpointException;
 
 /**
@@ -9,6 +10,13 @@ use Dan\Shopify\Exceptions\InvalidOrMissingEndpointException;
  */
 class Customers extends Endpoint
 {
+    public function ensureGraphQLSupport(): void
+    {
+        if (config('shopify.endpoints.customers')) {
+            throw new GraphQLEnabledWithMissingQueriesException();
+        }
+    }
+
     /**
      * @param string $endpoint
      *

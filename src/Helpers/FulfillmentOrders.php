@@ -2,8 +2,17 @@
 
 namespace Dan\Shopify\Helpers;
 
+use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
+
 class FulfillmentOrders extends Endpoint
 {
+    public function ensureGraphQLSupport(): void
+    {
+        if (config('shopify.endpoints.fulfillment_orders')) {
+            throw new GraphQLEnabledWithMissingQueriesException();
+        }
+    }
+
     /**
      * Accept a fulfillment request.
      *

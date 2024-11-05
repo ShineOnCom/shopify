@@ -2,4 +2,14 @@
 
 namespace Dan\Shopify\Helpers;
 
-class PriceRules extends Endpoint { }
+use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
+
+class PriceRules extends Endpoint
+{
+    public function ensureGraphQLSupport(): void
+    {
+        if (config('shopify.endpoints.price_rules')) {
+            throw new GraphQLEnabledWithMissingQueriesException();
+        }
+    }
+}
