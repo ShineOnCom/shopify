@@ -136,4 +136,16 @@ abstract class Endpoint
     public function ensureGraphQLSupport(): void
     {
     }
+
+    /**
+     * @param array $ids
+     * @param array $queue
+     * @param string $append
+     *
+     * @return string
+     */
+    public function makeGraphQLQuery(array $ids, array $queue, string $append): string
+    {
+        throw new GraphQLEnabledWithMissingQueriesException('Please override makeGraphQLQuery in child class');
+    }
 }
