@@ -117,7 +117,7 @@ abstract class Endpoint
      */
     public static function graphQLEnabled(string $endpoint): bool
     {
-        return config(sprintf('shopify.endpoints.%s', $endpoint));
+        return (int) config(sprintf('shopify.endpoints.%s', $endpoint)) === 1;
     }
 
     /**
