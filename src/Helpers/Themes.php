@@ -13,7 +13,7 @@ class Themes extends Endpoint
 {
     public function ensureGraphQLSupport(): void
     {
-        if (config('shopify.endpoints.themes')) {
+        if (self::graphQLEnabled('themes')) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

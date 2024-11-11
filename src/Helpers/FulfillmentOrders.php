@@ -8,7 +8,7 @@ class FulfillmentOrders extends Endpoint
 {
     public function ensureGraphQLSupport(): void
     {
-        if (config('shopify.endpoints.fulfillment_orders')) {
+        if (self::graphQLEnabled('fulfillment_orders')) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

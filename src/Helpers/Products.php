@@ -11,7 +11,7 @@ class Products extends Endpoint
 {
     public function ensureGraphQLSupport(): void
     {
-        if (config('shopify.endpoints.products')) {
+        if (self::graphQLEnabled('products')) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

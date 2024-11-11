@@ -11,7 +11,7 @@ class Webhooks extends Endpoint
 {
     public function ensureGraphQLSupport(): void
     {
-        if (config('shopify.endpoints.webhooks')) {
+        if (self::graphQLEnabled('webhooks')) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

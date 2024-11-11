@@ -9,7 +9,7 @@ class Metafields extends Endpoint
 {
     public function ensureGraphQLSupport(): void
     {
-        if (config('shopify.endpoints.metafields')) {
+        if (self::graphQLEnabled('metafields')) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

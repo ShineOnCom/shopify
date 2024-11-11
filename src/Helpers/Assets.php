@@ -14,7 +14,7 @@ class Assets extends Endpoint
 {
     public function ensureGraphQLSupport(): void
     {
-        if (config('shopify.endpoints.assets')) {
+        if (self::graphQLEnabled('assets')) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }
