@@ -322,6 +322,16 @@ class Shopify
      */
     public function get($query = [], $append = '')
     {
+        /** @var Endpoint */
+        $endpoint = $this->{$this->api};
+        if ($endpoint->graphQLEnabled()) {
+            /** @var AbstractModel $model */
+            $model = new static::$resource_models[$this->api]();
+            return $model->transformGraphQLResponse(
+                $this->graphql($endpoint->makeGraphQLQuery($this->ids, $this->queue, $append))
+            );
+        }
+
         $api = $this->api;
 
         // Don't allow use of page query on cursored endpoints
