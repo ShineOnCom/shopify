@@ -11,7 +11,7 @@ class Risks extends Endpoint
 {
     public function ensureGraphQLSupport(): void
     {
-        if (config('shopify.endpoints.risks')) {
+        if (self::graphQLEnabled('risks')) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

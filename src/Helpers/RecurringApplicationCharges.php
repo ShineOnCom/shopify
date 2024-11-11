@@ -8,7 +8,7 @@ class RecurringApplicationCharges extends Endpoint
 {
     public function ensureGraphQLSupport(): void
     {
-        if (config('shopify.endpoints.recurring_application_charges')) {
+        if (self::graphQLEnabled('recurring_application_charges')) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

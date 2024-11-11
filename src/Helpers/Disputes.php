@@ -11,7 +11,7 @@ class Disputes extends Endpoint
 {
     public function ensureGraphQLSupport(): void
     {
-        if (config('shopify.endpoints.disputes')) {
+        if (self::graphQLEnabled('disputes')) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

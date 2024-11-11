@@ -11,7 +11,7 @@ class Variants extends Endpoint
 {
     public function ensureGraphQLSupport(): void
     {
-        if (config('shopify.endpoints.variants')) {
+        if (self::graphQLEnabled('variants')) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

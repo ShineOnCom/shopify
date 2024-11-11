@@ -8,7 +8,7 @@ class DiscountCodes extends Endpoint
 {
     public function ensureGraphQLSupport(): void
     {
-        if (config('shopify.endpoints.discount_codes')) {
+        if (self::graphQLEnabled('discount_codes')) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

@@ -11,7 +11,7 @@ class Fulfillments extends Endpoint
 {
     public function ensureGraphQLSupport(): void
     {
-        if (config('shopify.endpoints.fulfillments')) {
+        if (self::graphQLEnabled('fulfillments')) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

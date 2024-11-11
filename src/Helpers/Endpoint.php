@@ -111,6 +111,16 @@ abstract class Endpoint
     }
 
     /**
+     * @param string $endpoint
+     *
+     * @return bool
+     */
+    public static function graphQLEnabled(string $endpoint): bool
+    {
+        return config(sprintf('shopify.endpoints.%s', $endpoint));
+    }
+
+    /**
      * All classes that extends Endpoint is expected to override this method to decide if they currently support GraphQL
      * They only need to support graphQL if the consumer configures GraphQL support based on config.shopify.endpoints
      *

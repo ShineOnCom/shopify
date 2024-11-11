@@ -11,7 +11,7 @@ class Images extends Endpoint
 {
     public function ensureGraphQLSupport(): void
     {
-        if (config('shopify.endpoints.images')) {
+        if (self::graphQLEnabled('images')) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

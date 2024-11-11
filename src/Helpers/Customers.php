@@ -12,7 +12,7 @@ class Customers extends Endpoint
 {
     public function ensureGraphQLSupport(): void
     {
-        if (config('shopify.endpoints.customers')) {
+        if (self::graphQLEnabled('customers')) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }
