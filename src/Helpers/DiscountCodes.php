@@ -6,9 +6,14 @@ use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
 
 class DiscountCodes extends Endpoint
 {
+    public function graphQLEnabled()
+    {
+        return parent::useGraphQL('discount_codes');
+    }
+
     public function ensureGraphQLSupport(): void
     {
-        if (self::graphQLEnabled('discount_codes')) {
+        if ($this->graphQLEnabled()) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

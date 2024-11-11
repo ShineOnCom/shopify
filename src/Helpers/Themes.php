@@ -11,9 +11,14 @@ use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
  */
 class Themes extends Endpoint
 {
+    public function graphQLEnabled()
+    {
+        return parent::useGraphQL('themes');
+    }
+
     public function ensureGraphQLSupport(): void
     {
-        if (self::graphQLEnabled('themes')) {
+        if ($this->graphQLEnabled()) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

@@ -9,9 +9,14 @@ use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
  */
 class FulfillmentServices extends Endpoint
 {
+    public function graphQLEnabled()
+    {
+        return parent::useGraphQL('fulfillment_services');
+    }
+
     public function ensureGraphQLSupport(): void
     {
-        if (self::graphQLEnabled('fulfillment_services')) {
+        if ($this->graphQLEnabled()) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

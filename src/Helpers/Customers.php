@@ -10,9 +10,14 @@ use Dan\Shopify\Exceptions\InvalidOrMissingEndpointException;
  */
 class Customers extends Endpoint
 {
+    public function graphQLEnabled()
+    {
+        return parent::useGraphQL('customers');
+    }
+
     public function ensureGraphQLSupport(): void
     {
-        if (self::graphQLEnabled('customers')) {
+        if ($this->graphQLEnabled()) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }
