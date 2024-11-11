@@ -9,9 +9,14 @@ use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
  */
 class Webhooks extends Endpoint
 {
+    public function graphQLEnabled()
+    {
+        return parent::useGraphQL('webhooks');
+    }
+
     public function ensureGraphQLSupport(): void
     {
-        if (self::graphQLEnabled('webhooks')) {
+        if ($this->graphQLEnabled()) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

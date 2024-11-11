@@ -12,9 +12,15 @@ use Dan\Shopify\Models\Asset;
  */
 class Assets extends Endpoint
 {
+
+    public function graphQLEnabled()
+    {
+        return parent::useGraphQL('assets');
+    }
+
     public function ensureGraphQLSupport(): void
     {
-        if (self::graphQLEnabled('assets')) {
+        if ($this->graphQLEnabled()) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

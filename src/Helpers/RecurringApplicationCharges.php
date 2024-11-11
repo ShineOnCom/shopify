@@ -6,9 +6,14 @@ use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
 
 class RecurringApplicationCharges extends Endpoint
 {
+    public function graphQLEnabled()
+    {
+        return parent::useGraphQL('recurring_application_charges');
+    }
+
     public function ensureGraphQLSupport(): void
     {
-        if (self::graphQLEnabled('recurring_application_charges')) {
+        if ($this->graphQLEnabled()) {
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }

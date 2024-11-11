@@ -110,12 +110,18 @@ abstract class Endpoint
         return $this->client->$method(...$parameters);
     }
 
+    public function graphQLEnabled()
+    {
+        return false;
+    }
+
+
     /**
      * @param string $endpoint
      *
      * @return bool
      */
-    public static function graphQLEnabled(string $endpoint): bool
+    public static function useGraphQL(string $endpoint): bool
     {
         return (int) config(sprintf('shopify.endpoints.%s', $endpoint)) === 1;
     }
