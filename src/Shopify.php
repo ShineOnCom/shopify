@@ -3,24 +3,25 @@
 namespace Dan\Shopify;
 
 use BadMethodCallException;
-use Dan\Shopify\Models\AssignedFulfillmentOrder;
-use Dan\Shopify\Models\FulfillmentOrder;
-use Dan\Shopify\Models\RecurringApplicationCharge;
+use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
 use Dan\Shopify\Exceptions\InvalidOrMissingEndpointException;
 use Dan\Shopify\Exceptions\ModelNotFoundException;
 use Dan\Shopify\Helpers\Endpoint;
 use Dan\Shopify\Models\AbstractModel;
 use Dan\Shopify\Models\Asset;
+use Dan\Shopify\Models\AssignedFulfillmentOrder;
 use Dan\Shopify\Models\Customer;
 use Dan\Shopify\Models\DiscountCode;
 use Dan\Shopify\Models\Dispute;
 use Dan\Shopify\Models\Fulfillment;
+use Dan\Shopify\Models\FulfillmentOrder;
 use Dan\Shopify\Models\FulfillmentService;
 use Dan\Shopify\Models\Image;
 use Dan\Shopify\Models\Metafield;
 use Dan\Shopify\Models\Order;
 use Dan\Shopify\Models\PriceRule;
 use Dan\Shopify\Models\Product;
+use Dan\Shopify\Models\RecurringApplicationCharge;
 use Dan\Shopify\Models\Risk;
 use Dan\Shopify\Models\SmartCollections;
 use Dan\Shopify\Models\Theme;
@@ -75,36 +76,64 @@ use Psr\Http\Message\MessageInterface;
 class Shopify
 {
     const SCOPE_READ_ANALYTICS = 'read_analytics';
+
     const SCOPE_READ_ASSIGNED_FULFILLMENT_ORDERS = 'read_assigned_fulfillment_orders';
+
     const SCOPE_READ_CHECKOUTS = 'read_checkouts';
+
     const SCOPE_READ_CONTENT = 'read_content';
+
     const SCOPE_READ_CUSTOMERS = 'read_customers';
+
     const SCOPE_READ_DRAFT_ORDERS = 'read_draft_orders';
+
     const SCOPE_READ_FULFILLMENTS = 'read_fulfillments';
+
     const SCOPE_READ_ORDERS = 'read_orders';
+
     const SCOPE_READ_ORDERS_ALL = 'read_all_orders';
+
     const SCOPE_READ_PRICE_RULES = 'read_price_rules';
+
     const SCOPE_READ_PRODUCTS = 'read_products';
+
     const SCOPE_READ_REPORTS = 'read_reports';
+
     const SCOPE_READ_SCRIPT_TAGS = 'read_script_tags';
+
     const SCOPE_READ_SHIPPING = 'read_shipping';
+
     const SCOPE_READ_THEMES = 'read_themes';
+
     const SCOPE_READ_USERS = 'read_users';
+
     const SCOPE_WRITE_CHECKOUTS = 'write_checkouts';
+
     const SCOPE_WRITE_CONTENT = 'write_content';
+
     const SCOPE_WRITE_CUSTOMERS = 'write_customers';
+
     const SCOPE_WRITE_DRAFT_ORDERS = 'write_draft_orders';
+
     const SCOPE_WRITE_FULFILLMENTS = 'write_fulfillments';
+
     const SCOPE_WRITE_ORDERS = 'write_orders';
+
     const SCOPE_WRITE_PRICE_RULES = 'write_price_rules';
+
     const SCOPE_WRITE_PRODUCTS = 'write_products';
+
     const SCOPE_WRITE_REPORTS = 'write_reports';
+
     const SCOPE_WRITE_SCRIPT_TAGS = 'write_script_tags';
+
     const SCOPE_WRITE_SHIPPING = 'write_shipping';
+
     const SCOPE_WRITE_THEMES = 'write_themes';
+
     const SCOPE_WRITE_USERS = 'write_users';
 
-    /** @var array $scopes */
+    /** @var array */
     public static $scopes = [
         self::SCOPE_READ_ANALYTICS,
         self::SCOPE_READ_ASSIGNED_FULFILLMENT_ORDERS,
@@ -147,11 +176,11 @@ class Shopify
     /**
      * The cursors for navigating current endpoint pages, if supported.
      *
-     * @var array $cursors
+     * @var array
      */
     public $cursors = [];
 
-    /** @var array $ids */
+    /** @var array */
     public $ids = [];
 
     /**
@@ -161,16 +190,16 @@ class Shopify
      */
     public $queue = [];
 
-    /** @var string $base */
+    /** @var string */
     protected $base = 'admin';
 
-    /** @var array $last_headers */
+    /** @var array */
     protected $last_headers;
 
-    /** @var MessageInterface $last_response */
+    /** @var MessageInterface */
     protected $last_response;
 
-    /** @var RateLimit $rate_limit */
+    /** @var RateLimit */
     protected $rate_limit;
 
     /**
@@ -179,52 +208,52 @@ class Shopify
      * @var array
      */
     protected static $endpoints = [
-        'assets'                        => 'assets.json',
-        'assigned_fulfillment_orders'   => 'assigned_fulfillment_orders/%s.json',
-        'customers'                     => 'customers/%s.json',
-        'discount_codes'                => 'discount_codes/%s.json',
-        'disputes'                      => 'shopify_payments/disputes/%s.json',
-        'fulfillments'                  => 'fulfillments/%s.json',
-        'fulfillment_orders'            => 'fulfillment_orders/%s.json',
-        'fulfillment_services'          => 'fulfillment_services/%s.json',
-        'graphql'                       => 'graphql.json',
-        'images'                        => 'images/%s.json',
-        'metafields'                    => 'metafields/%s.json',
-        'orders'                        => 'orders/%s.json',
-        'price_rules'                   => 'price_rules/%s.json',
-        'products'                      => 'products/%s.json',
+        'assets' => 'assets.json',
+        'assigned_fulfillment_orders' => 'assigned_fulfillment_orders/%s.json',
+        'customers' => 'customers/%s.json',
+        'discount_codes' => 'discount_codes/%s.json',
+        'disputes' => 'shopify_payments/disputes/%s.json',
+        'fulfillments' => 'fulfillments/%s.json',
+        'fulfillment_orders' => 'fulfillment_orders/%s.json',
+        'fulfillment_services' => 'fulfillment_services/%s.json',
+        'graphql' => 'graphql.json',
+        'images' => 'images/%s.json',
+        'metafields' => 'metafields/%s.json',
+        'orders' => 'orders/%s.json',
+        'price_rules' => 'price_rules/%s.json',
+        'products' => 'products/%s.json',
         'recurring_application_charges' => 'recurring_application_charges/%s.json',
-        'risks'                         => 'risks/%s.json',
-        'smart_collections'             => 'smart_collections/%s.json',
-        'themes'                        => 'themes/%s.json',
-        'variants'                      => 'variants/%s.json',
-        'webhooks'                      => 'webhooks/%s.json',
+        'risks' => 'risks/%s.json',
+        'smart_collections' => 'smart_collections/%s.json',
+        'themes' => 'themes/%s.json',
+        'variants' => 'variants/%s.json',
+        'webhooks' => 'webhooks/%s.json',
     ];
 
-    /** @var array $resource_models */
+    /** @var array */
     protected static $resource_models = [
         'assigned_fulfillment_orders' => AssignedFulfillmentOrder::class,
-        'assets'                        => Asset::class,
-        'customers'                     => Customer::class,
-        'discount_codes'                => DiscountCode::class,
-        'disputes'                      => Dispute::class,
-        'fulfillments'                  => Fulfillment::class,
-        'fulfillment_orders'            => FulfillmentOrder::class,
-        'fulfillment_services'          => FulfillmentService::class,
-        'images'                        => Image::class,
-        'metafields'                    => Metafield::class,
-        'orders'                        => Order::class,
-        'price_rules'                   => PriceRule::class,
-        'products'                      => Product::class,
+        'assets' => Asset::class,
+        'customers' => Customer::class,
+        'discount_codes' => DiscountCode::class,
+        'disputes' => Dispute::class,
+        'fulfillments' => Fulfillment::class,
+        'fulfillment_orders' => FulfillmentOrder::class,
+        'fulfillment_services' => FulfillmentService::class,
+        'images' => Image::class,
+        'metafields' => Metafield::class,
+        'orders' => Order::class,
+        'price_rules' => PriceRule::class,
+        'products' => Product::class,
         'recurring_application_charges' => RecurringApplicationCharge::class,
-        'risks'                         => Risk::class,
-        'smart_collections'             => SmartCollections::class,
-        'themes'                        => Theme::class,
-        'variants'                      => Variant::class,
-        'webhooks'                      => Webhook::class,
+        'risks' => Risk::class,
+        'smart_collections' => SmartCollections::class,
+        'themes' => Theme::class,
+        'variants' => Variant::class,
+        'webhooks' => Webhook::class,
     ];
 
-    /** @var array $cursored_enpoints */
+    /** @var array */
     protected static $cursored_enpoints = [
         'customers',
         'discount_codes',
@@ -246,9 +275,9 @@ class Shopify
     /**
      * Shopify constructor.
      *
-     * @param string $shop
-     * @param string $token
-     * @param null $base
+     * @param  string  $shop
+     * @param  string  $token
+     * @param  null  $base
      */
     public function __construct($shop, $token, $base = null)
     {
@@ -260,15 +289,14 @@ class Shopify
         $this->client = Http::baseUrl($base_uri)
             ->withHeaders([
                 'X-Shopify-Access-Token' => $token,
-                'Accept'                 => 'application/json',
-                'Content-Type'           => 'application/json; charset=utf-8;',
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json; charset=utf-8;',
             ]);
     }
 
     /**
-     * @param string $shop
-     * @param string $token
-     *
+     * @param  string  $shop
+     * @param  string  $token
      * @return Shopify
      */
     public static function make($shop, $token)
@@ -292,29 +320,59 @@ class Shopify
      *   }
      * }
      *
-     * @param string $query
+     * @param  string  $query
+     * @param  array  $variables
      * @return array
      *
      * @throws InvalidOrMissingEndpointException
-     * @throws \Illuminate\Http\Client\RequestException
      */
-    public function graphql($query)
+    public function graphql($query, $variables = null)
     {
         $uri = static::makeUri('graphql');
 
-        $options = ['json' => compact('query')];
+        $json = ['query' => $query];
+        // dd($query);
+        if ($variables) {
+            $json['variables'] = $variables;
+        }
+
+        static::log('log_api_request_data', $json);
+
+        $options = ['json' => $json];
 
         $response = $this->client->send('POST', $uri, $options)->throw();
 
-        return json_decode($response->getBody()->getContents(), true);
+        $response = json_decode($response->getBody()->getContents(), true);
+        static::log('log_api_response_data', $response);
+
+        return $response;
+    }
+
+    private function graphQLEnabled(): bool
+    {
+        return $this->api && $this->{$this->api}->graphQLEnabled();
+    }
+
+    /**
+     * @throws GraphQLEnabledWithMissingQueriesException
+     */
+    private function withGraphQL(string $append, ?array $payload = null, bool $mutate = false): array
+    {
+        if ($this->graphQLEnabled()) {
+            $queryAndVariables = $this->{$this->api}->makeGraphQLQuery($this->ids, $this->queue, $append, $payload, $mutate);
+
+            return (new static::$resource_models[$this->api]())
+                ->transformGraphQLResponse($this->graphql($queryAndVariables['query'], $queryAndVariables['variables']));
+        }
+
+        throw new GraphQLEnabledWithMissingQueriesException();
     }
 
     /**
      * Get a resource using the assigned endpoint ($this->endpoint).
      *
-     * @param array $query
-     * @param string $append
-     *
+     * @param  array  $query
+     * @param  string  $append
      * @return array
      *
      * @throws InvalidOrMissingEndpointException
@@ -322,25 +380,15 @@ class Shopify
      */
     public function get($query = [], $append = '')
     {
-        /** @var Endpoint */
-        $endpoint = $this->{$this->api};
-        if ($endpoint->graphQLEnabled()) {
-            /** @var AbstractModel $model */
-            $model = new static::$resource_models[$this->api]();
-            return $model->transformGraphQLResponse(
-                $this->graphql($endpoint->makeGraphQLQuery($this->ids, $this->queue, $append))
-            );
+        if ($this->graphQLEnabled()) {
+            return $this->withGraphQL($append, $query);
         }
 
         $api = $this->api;
 
         // Don't allow use of page query on cursored endpoints
         if (isset($query['page']) && in_array($api, static::$cursored_enpoints, true)) {
-            if (Util::isLaravel()) {
-                if (config('shopify.options.log_deprecation_warnings')) {
-                    \Log::warning('vendor:dan:shopify:get', ['Use of deprecated query parameter. Use cursor navigation instead.']);
-                }
-            }
+            static::log('log_deprecation_warnings', ['Use of deprecated query parameter. Use cursor navigation instead.']);
 
             return [];
         }
@@ -370,9 +418,8 @@ class Shopify
     }
 
     /**
-     * @param array $query
-     * @param string $append
-     *
+     * @param  array  $query
+     * @param  string  $append
      * @return array|null
      *
      * @throws GuzzleException
@@ -382,11 +429,7 @@ class Shopify
     {
         // Only allow use of next on cursored endpoints
         if (! in_array($this->api, static::$cursored_enpoints, true)) {
-            if (Util::isLaravel()) {
-                if (config('shopify.options.log_deprecation_warnings')) {
-                    \Log::warning('vendor:dan:shopify:get', ['Use of cursored method on non-cursored endpoint.']);
-                }
-            }
+            static::log('log_deprecation_warnings', ['Use of cursored method on non-cursored endpoint.']);
 
             return [];
         }
@@ -399,11 +442,7 @@ class Shopify
         // Only limit key is allowed to exist with cursor based navigation
         foreach (array_keys($query) as $key) {
             if ($key !== 'limit') {
-                if (Util::isLaravel()) {
-                    if (config('shopify.options.log_deprecation_warnings')) {
-                        \Log::warning('vendor:dan:shopify:get', ['Limit param is not allowed with cursored queries.']);
-                    }
-                }
+                static::log('log_deprecation_warnings', ['Limit param is not allowed with cursored queries.']);
 
                 return [];
             }
@@ -424,6 +463,7 @@ class Shopify
      * Get the shop resource.
      *
      * @return array
+     *
      * @throws GuzzleException
      */
     public function shop()
@@ -438,12 +478,11 @@ class Shopify
     /**
      * Post to a resource using the assigned endpoint ($this->api).
      *
-     * @param array|AbstractModel $payload
-     * @param string $append
-     *
+     * @param  array|AbstractModel  $payload
+     * @param  string  $append
      * @return array|AbstractModel
-     * @throws GuzzleException
      *
+     * @throws GuzzleException
      * @throws InvalidOrMissingEndpointException
      */
     public function post($payload = [], $append = '')
@@ -454,12 +493,11 @@ class Shopify
     /**
      * Update a resource using the assigned endpoint ($this->api).
      *
-     * @param array|AbstractModel $payload
-     * @param string $append
-     *
+     * @param  array|AbstractModel  $payload
+     * @param  string  $append
      * @return array|AbstractModel
-     * @throws GuzzleException
      *
+     * @throws GuzzleException
      * @throws InvalidOrMissingEndpointException
      */
     public function put($payload = [], $append = '')
@@ -468,18 +506,20 @@ class Shopify
     }
 
     /**
-     * @param $post_or_post
-     * @param array  $payload
-     * @param string $append
+     * @param  array  $payload
+     * @param  string  $append
+     * @return mixed
      *
      * @throws InvalidOrMissingEndpointException
      * @throws GuzzleException
-     *
-     * @return mixed
      */
     private function post_or_put($post_or_post, $payload = [], $append = '')
     {
         $payload = $this->normalizePayload($payload);
+        if ($this->graphQLEnabled()) {
+            return $this->withGraphQL($append, $payload, true);
+        }
+
         $api = $this->api;
         $uri = $this->uri($append);
 
@@ -511,12 +551,11 @@ class Shopify
     /**
      * Delete a resource using the assigned endpoint ($this->api).
      *
-     * @param array|string $query
+     * @param  array|string  $query
+     * @return array
      *
      * @throws GuzzleException
      * @throws InvalidOrMissingEndpointException
-     *
-     * @return array
      */
     public function delete($query = [])
     {
@@ -530,13 +569,11 @@ class Shopify
     }
 
     /**
-     * @param $id
+     * @return AbstractModel|null
      *
      * @throws GuzzleException
      * @throws InvalidOrMissingEndpointException
      * @throws ModelNotFoundException
-     *
-     * @return AbstractModel|null
      */
     public function find($id)
     {
@@ -567,12 +604,11 @@ class Shopify
     /**
      * Return an array of models or Collection (if Laravel present).
      *
-     * @param string|array $ids
+     * @param  string|array  $ids
+     * @return array|Collection
      *
      * @throws GuzzleException
      * @throws InvalidOrMissingEndpointException
-     *
-     * @return array|Collection
      */
     public function findMany($ids)
     {
@@ -586,13 +622,12 @@ class Shopify
     /**
      * Shopify limits to 250 results.
      *
-     * @param array $query
-     * @param string $append
+     * @param  array  $query
+     * @param  string  $append
+     * @return array|Collection
      *
      * @throws GuzzleException
      * @throws InvalidOrMissingEndpointException
-     *
-     * @return array|Collection
      */
     public function all($query = [], $append = '')
     {
@@ -618,12 +653,11 @@ class Shopify
     /**
      * Post to a resource using the assigned endpoint ($this->api).
      *
-     * @param AbstractModel $model
+     *
+     * @return AbstractModel
      *
      * @throws GuzzleException
      * @throws InvalidOrMissingEndpointException
-     *
-     * @return AbstractModel
      */
     public function save(AbstractModel $model)
     {
@@ -650,12 +684,10 @@ class Shopify
     }
 
     /**
-     * @param AbstractModel $model
+     * @return bool
      *
      * @throws GuzzleException
      * @throws InvalidOrMissingEndpointException
-     *
-     * @return bool
      */
     public function destroy(AbstractModel $model)
     {
@@ -669,12 +701,11 @@ class Shopify
     }
 
     /**
-     * @param array $query
+     * @param  array  $query
+     * @return int
      *
      * @throws GuzzleException
      * @throws InvalidOrMissingEndpointException
-     *
-     * @return int
      */
     public function count($query = [])
     {
@@ -688,11 +719,10 @@ class Shopify
     }
 
     /**
-     * @param string $append
+     * @param  string  $append
+     * @return string
      *
      * @throws InvalidOrMissingEndpointException
-     *
-     * @return string
      */
     public function uri($append = '')
     {
@@ -713,8 +743,7 @@ class Shopify
     }
 
     /**
-     * @param string|null $base
-     *
+     * @param  string|null  $base
      * @return $this
      */
     public function setBase($base = null)
@@ -733,15 +762,14 @@ class Shopify
     }
 
     /**
-     * @param string $api
-     * @param array  $ids
-     * @param array  $queue
-     * @param string $append
-     * @param string $base
+     * @param  string  $api
+     * @param  array  $ids
+     * @param  array  $queue
+     * @param  string  $append
+     * @param  string  $base
+     * @return string
      *
      * @throws InvalidOrMissingEndpointException
-     *
-     * @return string
      */
     private static function makeUri($api, $ids = [], $queue = [], $append = '', $base = 'admin')
     {
@@ -783,8 +811,6 @@ class Shopify
     }
 
     /**
-     * @param $payload
-     *
      * @return mixed
      */
     private function normalizePayload($payload)
@@ -816,8 +842,7 @@ class Shopify
     }
 
     /**
-     * @param string $api
-     *
+     * @param  string  $api
      * @return string
      */
     private static function apiCollectionProperty($api)
@@ -837,8 +862,7 @@ class Shopify
     }
 
     /**
-     * @param string $api
-     *
+     * @param  string  $api
      * @return string
      */
     private static function apiEntityProperty($api)
@@ -852,9 +876,9 @@ class Shopify
     /**
      * Set our endpoint by accessing it like a property.
      *
-     * @param string $endpoint
-     *
+     * @param  string  $endpoint
      * @return $this|Endpoint
+     *
      * @throws \Exception
      */
     public function __get($endpoint)
@@ -879,12 +903,11 @@ class Shopify
     /**
      * Set ids for one uri() call.
      *
-     * @param string $method
-     * @param array  $parameters
+     * @param  string  $method
+     * @param  array  $parameters
+     * @return $this
      *
      * @throws BadMethodCallException
-     *
-     * @return $this
      */
     public function __call($method, $parameters)
     {
@@ -901,47 +924,37 @@ class Shopify
     /**
      * Wrapper to the $client->request method.
      *
-     * @param string $method
-     * @param string $uri
-     * @param array $options
-     *
+     * @param  string  $method
+     * @param  string  $uri
      * @return \Illuminate\Http\Client\Response
+     *
      * @throws \Illuminate\Http\Client\RequestException|\Exception
      */
     public function request($method, $uri = '', array $options = [])
     {
-        if (Util::isLaravel() && config('shopify.options.log_api_request_data')) {
-            \Log::info('vendor:dan:shopify:api:request', compact('method', 'uri') + $options);
-        }
+        static::log('log_api_request_data', compact('method', 'uri') + $options);
 
         $this->last_response = $r = $this->client->send($method, $uri, $options)->throw();
         $this->last_headers = $r->headers();
         $this->rate_limit = new RateLimit($r);
 
-        if (Util::isLaravel() && config('shopify.options.log_api_response_data')) {
-            \Log::info('vendor:dan:shopify:api:response', (array) $r);
-        }
+        static::log('log_api_response_data', (array) $r);
 
         $api_deprecated_reason = $r->header('X-Shopify-API-Deprecated-Reason');
         $api_version_warning = $r->header('X-Shopify-Api-Version-Warning');
         if ($api_deprecated_reason || $api_version_warning) {
             $api_version = $r->header('X-Shopify-Api-Version');
-            if (Util::isLaravel()) {
-                if (config('shopify.options.log_deprecation_warnings')) {
-                    $api = compact('api_version', 'api_version_warning', 'api_deprecated_reason');
-                    $request = compact('method', 'uri') + $options;
-                    \Log::warning('vendor:dan:shopify:api:deprecated', compact('api', 'request'));
-                }
-            }
+            $api = compact('api_version', 'api_version_warning', 'api_deprecated_reason');
+            $request = compact('method', 'uri') + $options;
+            static::log('log_deprecation_warnings', compact('api', 'request'));
         }
 
         return $r;
     }
 
     /**
-     * @param callable $request
-     *
      * @return array
+     *
      * @throws \Illuminate\Http\Client\RequestException
      */
     public function rateLimited(callable $request)
@@ -958,8 +971,7 @@ class Shopify
     }
 
     /**
-     * @param bool $fetch_if_empty
-     *
+     * @param  bool  $fetch_if_empty
      * @return RateLimit
      *
      * @throws GuzzleException
@@ -991,8 +1003,6 @@ class Shopify
     }
 
     /**
-     * @param $linkHeader
-     *
      * @return array
      */
     protected static function parseLinkHeader($linkHeader)
@@ -1010,5 +1020,26 @@ class Shopify
         }
 
         return $cursors;
+    }
+
+    private static function log(string $type = 'log_api_request_data', array $context = [])
+    {
+        if (Util::isLaravel() && config(sprintf('shopify.options.%s', $type))) {
+            $message = match ($type) {
+                'log_api_request_data' => 'vendor:dan:shopify:api:request',
+                'log_api_response_data' => 'vendor:dan:shopify:api:response',
+                'log_deprecation_warnings' => 'vendor:dan:shopify:api:deprecated',
+                default => 'vendor:dan:shopify'
+            };
+
+            switch ($message) {
+                case 'log_deprecation_warnings':
+                    \Log::warning($message, $context);
+                    break;
+
+                default:
+                    \Log::info($message, $context);
+            }
+        }
     }
 }

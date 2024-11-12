@@ -16,7 +16,7 @@ use Dan\Shopify\Shopify;
  */
 abstract class Endpoint
 {
-    /** @var string[] $endpoints */
+    /** @var string[] */
     protected static $endpoints = [
         'assets',
         'assigned_fulfillment_orders',
@@ -39,13 +39,11 @@ abstract class Endpoint
         'webhooks',
     ];
 
-    /** @var Shopify $client */
+    /** @var Shopify */
     protected $client;
 
     /**
      * Endpoint constructor.
-     *
-     * @param Shopify $client
      */
     public function __construct(Shopify $client)
     {
@@ -55,8 +53,7 @@ abstract class Endpoint
     /**
      * Set our endpoint by accessing it via a property.
      *
-     * @param string $property
-     *
+     * @param  string  $property
      * @return $this
      */
     public function __get($property)
@@ -66,7 +63,7 @@ abstract class Endpoint
             $client = $this->client;
 
             if (empty($client->ids)) {
-                throw new InvalidOrMissingEndpointException('Calling ' . $method . ' from ' . $this->client->api . ' requires an id');
+                throw new InvalidOrMissingEndpointException('Calling '.$method.' from '.$this->client->api.' requires an id');
             }
 
             $last = array_reverse($client->ids)[0] ?? null;
@@ -83,16 +80,15 @@ abstract class Endpoint
     /**
      * Handle dynamic method calls into the model.
      *
-     * @param string $method
-     * @param array  $parameters
-     *
+     * @param  string  $method
+     * @param  array  $parameters
      * @return mixed
      */
     public function __call($method, $parameters)
     {
         if (in_array($method, static::$endpoints)) {
             if ($parameters === []) {
-                throw new InvalidOrMissingEndpointException('Calling ' . $method . ' from ' . $this->client->api . ' requires an id');
+                throw new InvalidOrMissingEndpointException('Calling '.$method.' from '.$this->client->api.' requires an id');
             }
 
             $last = array_reverse($this->client->ids)[0] ?? null;
@@ -115,12 +111,6 @@ abstract class Endpoint
         return false;
     }
 
-
-    /**
-     * @param string $endpoint
-     *
-     * @return bool
-     */
     public static function useGraphQL(string $endpoint): bool
     {
         return (int) config(sprintf('shopify.endpoints.%s', $endpoint)) === 1;
@@ -131,6 +121,7 @@ abstract class Endpoint
      * They only need to support graphQL if the consumer configures GraphQL support based on config.shopify.endpoints
      *
      * @return bool
+     *
      * @throws GraphQLEnabledWithMissingQueriesException
      */
     public function ensureGraphQLSupport(): void
@@ -138,13 +129,9 @@ abstract class Endpoint
     }
 
     /**
-     * @param array $ids
-     * @param array $queue
-     * @param string $append
-     *
-     * @return string
+     * @return array{query: string, variables: array}
      */
-    public function makeGraphQLQuery(array $ids, array $queue, string $append): string
+    public function makeGraphQLQuery(array $ids, array $queue, string $append, ?array $payload = null, bool $mutate = false): array
     {
         throw new GraphQLEnabledWithMissingQueriesException('Please override makeGraphQLQuery in child class');
     }
