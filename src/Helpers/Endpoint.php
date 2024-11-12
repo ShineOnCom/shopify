@@ -63,7 +63,7 @@ abstract class Endpoint
             $client = $this->client;
 
             if (empty($client->ids)) {
-                throw new InvalidOrMissingEndpointException('Calling '.$method.' from '.$this->client->api.' requires an id');
+                throw new InvalidOrMissingEndpointException('Calling '.$property.' from '.$this->client->api.' requires an id');
             }
 
             $last = array_reverse($client->ids)[0] ?? null;
