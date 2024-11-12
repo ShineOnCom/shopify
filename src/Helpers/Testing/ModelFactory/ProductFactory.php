@@ -5,9 +5,6 @@ namespace Dan\Shopify\Helpers\Testing\ModelFactory;
 class ProductFactory
 {
     /**
-     * @param int $quantity
-     * @param array $overrides
-     *
      * @return array
      */
     public static function create(int $quantity = 1, array $overrides = [])
@@ -26,7 +23,6 @@ class ProductFactory
     /**
      * Example response from https://help.shopify.com/en/api/reference/products/product#show.
      *
-     * @param $overrides
      *
      * @return array
      */

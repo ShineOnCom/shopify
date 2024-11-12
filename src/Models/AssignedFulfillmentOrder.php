@@ -97,8 +97,8 @@ class AssignedFulfillmentOrder extends AbstractModel
      * @var array
      */
     protected $casts = [
-        'id'                   => 'integer',
-        'shop_id'              => 'integer',
+        'id' => 'integer',
+        'shop_id' => 'integer',
         'assigned_location_id' => 'integer',
     ];
 }

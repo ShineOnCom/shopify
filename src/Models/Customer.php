@@ -39,26 +39,26 @@ use Carbon\Carbon;
  */
 class Customer extends AbstractModel
 {
-    /** @var string $resource_name */
+    /** @var string */
     public static $resource_name = 'customer';
 
-    /** @var string $resource_name_many */
+    /** @var string */
     public static $resource_name_many = 'customers';
 
-    /** @var array $dates */
+    /** @var array */
     protected $dates = [
         'created_at',
         'updated_at',
     ];
 
-    /** @var array $casts */
+    /** @var array */
     protected $casts = [
         'accepts_marketing' => 'bool',
-        'addresses'         => 'array',
-        'default_address'   => 'object',
-        'orders_count'      => 'integer',
-        'tax_exempt'        => 'bool',
-        'total_spent'       => 'float',
-        'verified_email'    => 'bool',
+        'addresses' => 'array',
+        'default_address' => 'object',
+        'orders_count' => 'integer',
+        'tax_exempt' => 'bool',
+        'total_spent' => 'float',
+        'verified_email' => 'bool',
     ];
 }

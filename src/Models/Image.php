@@ -17,25 +17,25 @@ namespace Dan\Shopify\Models;
  */
 class Image extends AbstractModel
 {
-    /** @var string $resource_name */
+    /** @var string */
     public static $resource_name = 'image';
 
-    /** @var string $resource_name_many */
+    /** @var string */
     public static $resource_name_many = 'images';
 
-    /** @var array $dates */
+    /** @var array */
     protected $dates = [
         'created_at',
         'updated_at',
     ];
 
-    /** @var array $casts */
+    /** @var array */
     protected $casts = [
-        'product_id'  => 'int',
-        'position'    => 'int',
-        'width'       => 'int',
-        'height'      => 'int',
-        'src'         => 'string',
+        'product_id' => 'int',
+        'position' => 'int',
+        'width' => 'int',
+        'height' => 'int',
+        'src' => 'string',
         'variant_ids' => 'array',
     ];
 }

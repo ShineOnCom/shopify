@@ -15,6 +15,7 @@ class OrdersApiTest extends TestCase
      * Retrieves a list of products.
      *
      * @test
+     *
      * @throws Throwable
      */
     public function it_gets_a_list_of_orders()
@@ -34,12 +35,13 @@ class OrdersApiTest extends TestCase
      * Retrieve a count of all orders.
      *
      * @test
+     *
      * @throws Throwable
      */
     public function it_gets_a_count_of_orders()
     {
         Http::fake([
-            'https://shop.myshopify.com/admin/orders/count.json' => Http::response(['count' => 2])
+            'https://shop.myshopify.com/admin/orders/count.json' => Http::response(['count' => 2]),
         ]);
 
         (new Shopify('shop', 'token'))->orders->count();
@@ -55,6 +57,7 @@ class OrdersApiTest extends TestCase
      * Retrieves a single order.
      *
      * @test
+     *
      * @throws Throwable
      */
     public function it_gets_an_order()
@@ -74,6 +77,7 @@ class OrdersApiTest extends TestCase
      * Creates a new order.
      *
      * @test
+     *
      * @throws Throwable
      */
     public function it_creates_a_new_order()
@@ -81,7 +85,7 @@ class OrdersApiTest extends TestCase
         Http::fake();
 
         (new Shopify('shop', 'token'))->orders->post($order = [
-            'key1' => 'value1'
+            'key1' => 'value1',
         ]);
 
         Http::assertSent(function (Request $request) use ($order) {
@@ -96,6 +100,7 @@ class OrdersApiTest extends TestCase
      * Updates a order.
      *
      * @test
+     *
      * @throws Throwable
      */
     public function it_updates_a_order()
@@ -103,7 +108,7 @@ class OrdersApiTest extends TestCase
         Http::fake();
 
         (new Shopify('shop', 'token'))->orders(123)->put($order = [
-            'key1' => 'value1'
+            'key1' => 'value1',
         ]);
 
         $order['id'] = 123;
@@ -120,6 +125,7 @@ class OrdersApiTest extends TestCase
      * Delete a order.
      *
      * @test
+     *
      * @throws Throwable
      */
     public function it_deletes_a_order()
@@ -139,6 +145,7 @@ class OrdersApiTest extends TestCase
      * Closes an order.
      *
      * @test
+     *
      * @throws Throwable
      */
     public function it_closes_an_order()

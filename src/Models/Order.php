@@ -73,13 +73,13 @@ namespace Dan\Shopify\Models;
  */
 class Order extends AbstractModel
 {
-    /** @var string $resource_name */
+    /** @var string */
     public static $resource_name = 'order';
 
-    /** @var string $resource_name_many */
+    /** @var string */
     public static $resource_name_many = 'orders';
 
-    /** @var array $dates */
+    /** @var array */
     protected $dates = [
         'closed_at',
         'created_at',
@@ -88,44 +88,50 @@ class Order extends AbstractModel
         'processed_at',
     ];
 
-    /** @var array $casts */
+    /** @var array */
     protected $casts = [
-        'test'                    => 'bool',
-        'confirmed'               => 'bool',
-        'total_price'             => 'float',
-        'subtotal_price'          => 'float',
-        'total_weight'            => 'float',
-        'total_tax'               => 'float',
-        'taxes_included'          => 'bool',
-        'total_discounts'         => 'float',
-        'total_line_items_price'  => 'float',
+        'test' => 'bool',
+        'confirmed' => 'bool',
+        'total_price' => 'float',
+        'subtotal_price' => 'float',
+        'total_weight' => 'float',
+        'total_tax' => 'float',
+        'taxes_included' => 'bool',
+        'total_discounts' => 'float',
+        'total_line_items_price' => 'float',
         'buyer_accepts_marketing' => 'float',
-        'total_price_usd'         => 'float',
-        'discount_codes'          => 'array',
-        'note_attributes'         => 'array',
-        'payment_gateway_names'   => 'array',
-        'line_items'              => 'array',
-        'shipping_lines'          => 'array',
-        'shipping_address'        => 'object',
-        'billing_address'         => 'object',
-        'tax_lines'               => 'array',
-        'fulfillments'            => 'array',
-        'refunds'                 => 'array',
-        'customer'                => 'object',
-        'client_details'          => 'object',
-        'payment_details'         => 'object',
+        'total_price_usd' => 'float',
+        'discount_codes' => 'array',
+        'note_attributes' => 'array',
+        'payment_gateway_names' => 'array',
+        'line_items' => 'array',
+        'shipping_lines' => 'array',
+        'shipping_address' => 'object',
+        'billing_address' => 'object',
+        'tax_lines' => 'array',
+        'fulfillments' => 'array',
+        'refunds' => 'array',
+        'customer' => 'object',
+        'client_details' => 'object',
+        'payment_details' => 'object',
     ];
 
     // Financial statuses from Shopify
     const FINANCIAL_STATUS_AUTHORIZED = 'authorized';
+
     const FINANCIAL_STATUS_PAID = 'paid';
+
     const FINANCIAL_STATUS_PARTIALLY_PAID = 'partially_paid';
+
     const FINANCIAL_STATUS_PARTIALLY_REFUNDED = 'partially_refunded';
+
     const FINANCIAL_STATUS_PENDING = 'pending';
+
     const FINANCIAL_STATUS_REFUNDED = 'refunded';
+
     const FINANCIAL_STATUS_VOIDED = 'voided';
 
-    /** @var array $financial_statuses */
+    /** @var array */
     public static $financial_statuses = [
         self::FINANCIAL_STATUS_AUTHORIZED,
         self::FINANCIAL_STATUS_PAID,
@@ -138,10 +144,12 @@ class Order extends AbstractModel
 
     // Fulfillment statuses from Shopify
     const FULFILLMENT_STATUS_FILLED = 'fulfilled';
+
     const FULFILLMENT_STATUS_PARTIAL = 'partial';
+
     const FULFILLMENT_STATUS_UNFILLED = null;
 
-    /** @var array $fulfillment_statuses */
+    /** @var array */
     public static $fulfillment_statuses = [
         self::FULFILLMENT_STATUS_FILLED,
         self::FULFILLMENT_STATUS_PARTIAL,
@@ -150,10 +158,12 @@ class Order extends AbstractModel
 
     // Risk recommendations from Shopify
     const RISK_RECOMMENDATION_LOW = 'accept';
+
     const RISK_RECOMMENDATION_MEDIUM = 'investigate';
+
     const RISK_RECOMMENDATION_HIGH = 'cancel';
 
-    /** @var array $risk_statuses */
+    /** @var array */
     public static $risk_statuses = [
         self::RISK_RECOMMENDATION_LOW,
         self::RISK_RECOMMENDATION_MEDIUM,
@@ -161,11 +171,14 @@ class Order extends AbstractModel
     ];
 
     const FILTER_STATUS_ANY = 'any';
+
     const FILTER_STATUS_CANCELLED = 'cancelled';
+
     const FILTER_STATUS_CLOSED = 'closed';
+
     const FILTER_STATUS_OPEN = 'open';
 
-    /** @var array $filter_statuses */
+    /** @var array */
     public static $filter_statuses = [
         self::FILTER_STATUS_ANY,
         self::FILTER_STATUS_CANCELLED,

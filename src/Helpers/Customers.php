@@ -23,11 +23,10 @@ class Customers extends Endpoint
     }
 
     /**
-     * @param string $endpoint
+     * @param  string  $endpoint
+     * @return $this|Endpoint
      *
      * @throws InvalidOrMissingEndpointException
-     *
-     * @return $this|Endpoint
      */
     public function __get($endpoint)
     {

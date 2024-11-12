@@ -3,7 +3,6 @@
 namespace Dan\Shopify\Helpers;
 
 use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
-use Dan\Shopify\Shopify;
 
 class Metafields extends Endpoint
 {
@@ -18,5 +17,4 @@ class Metafields extends Endpoint
             throw new GraphQLEnabledWithMissingQueriesException();
         }
     }
-
 }

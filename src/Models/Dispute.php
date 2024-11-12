@@ -20,13 +20,13 @@ namespace Dan\Shopify\Models;
  */
 class Dispute extends AbstractModel
 {
-    /** @var string $resource_name */
+    /** @var string */
     public static $resource_name = 'dispute';
 
-    /** @var string $resource_name_many */
+    /** @var string */
     public static $resource_name_many = 'disputes';
 
-    /** @var array $dates */
+    /** @var array */
     protected $dates = [
         'evidence_due_by',
         'evidence_sent_on',
@@ -34,40 +34,53 @@ class Dispute extends AbstractModel
         'initiated_at',
     ];
 
-    /** @var array $casts */
+    /** @var array */
     protected $casts = [
-        'type'                => 'string',
-        'currency'            => 'string',
-        'amount'              => 'float',
-        'reason'              => 'string',
+        'type' => 'string',
+        'currency' => 'string',
+        'amount' => 'float',
+        'reason' => 'string',
         'network_reason_code' => 'string',
-        'status'              => 'string',
+        'status' => 'string',
     ];
 
     const TYPE_CHARGEBACK = 'chargeback';
+
     const TYPE_INQUIRY = 'inquiry';
 
-    /** @var array $types */
+    /** @var array */
     public static $types = [
         self::TYPE_CHARGEBACK,
         self::TYPE_INQUIRY,
     ];
 
     const REASON_BANK_NOT_PROCESS = 'bank_not_process';
+
     const REASON_CREDIT_NOT_PROCESSED = 'credit_not_processed';
+
     const REASON_CUSTOMER_INITIATED = 'customer_initiated';
+
     const REASON_DEBIT_NOT_AUTHORIZED = 'debit_not_authorized';
+
     const REASON_DUPLICATE = 'duplicate';
+
     const REASON_FRAUDULENT = 'fraudulent';
+
     const REASON_GENERAL = 'general';
+
     const REASON_INCORRECT_ACCOUNT_DETAILS = 'incorrect_account_details';
+
     const REASON_INSUFFICIENT_FUNDS = 'insufficient_funds';
+
     const REASON_PRODUCT_NOT_RECEIVED = 'product_not_received';
+
     const REASON_PRODUCT_UNACCEPTABLE = 'product_unacceptable';
+
     const REASON_SUBSCRIPTION_CANCELED = 'subscription_canceled';
+
     const REASON_UNRECOGNIZED = 'unrecognized';
 
-    /** @var array $reasons */
+    /** @var array */
     public static $reasons = [
         self::REASON_BANK_NOT_PROCESS,
         self::REASON_CREDIT_NOT_PROCESSED,
@@ -85,13 +98,18 @@ class Dispute extends AbstractModel
     ];
 
     const STATUS_NEEDS_RESPONSE = 'needs_response';
+
     const STATUS_UNDER_REVIEW = 'under_review';
+
     const STATUS_CHARGE_REFUNDED = 'charge_refunded';
+
     const STATUS_ACCEPTED = 'accepted';
+
     const STATUS_WON = 'won';
+
     const STATUS_LOST = 'lost';
 
-    /** @var array $statuses */
+    /** @var array */
     public static $statuses = [
         self::STATUS_NEEDS_RESPONSE,
         self::STATUS_UNDER_REVIEW,

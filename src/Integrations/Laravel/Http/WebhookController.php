@@ -13,12 +13,9 @@ use Response;
 class WebhookController
 {
     /**
-     * @param $topic
-     * @param Request $request
+     * @return JsonResponse
      *
      * @throws BadMethodCallException
-     *
-     * @return JsonResponse
      */
     public function handle($topic, Request $request)
     {
