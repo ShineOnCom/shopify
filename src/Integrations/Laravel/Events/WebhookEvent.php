@@ -12,21 +12,19 @@ class WebhookEvent implements ShouldQueue
 {
     use Queueable;
 
-    /** @var string $topic */
+    /** @var string */
     protected $topic;
 
-    /** @var array $data */
+    /** @var array */
     protected $data;
 
-    /** @var string|null $shop */
+    /** @var string|null */
     protected $shop;
 
     /**
      * WebhookEvent constructor.
      *
-     * @param string $topic
-     * @param array  $data
-     * @param string $shop
+     * @param  string  $topic
      */
     public function __construct($topic, array $data, string $shop)
     {

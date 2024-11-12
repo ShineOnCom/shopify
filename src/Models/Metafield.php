@@ -4,7 +4,6 @@ namespace Dan\Shopify\Models;
 
 /**
  * Class Metafields
- * @package Dan\Shopify\Models
  *
  * @property int $id
  * @property string $description
@@ -16,17 +15,16 @@ namespace Dan\Shopify\Models;
  * @property string $value_type
  * @property \DateTime $created_at
  * @property \DateTime $updated_at
- *
  */
 class Metafield extends AbstractModel
 {
-    /** @var string $resource_name */
+    /** @var string */
     public static $resource_name = 'metafield';
 
-    /** @var string $resource_name_many */
+    /** @var string */
     public static $resource_name_many = 'metafields';
 
-    /** @var array $dates */
+    /** @var array */
     protected $dates = [
         'created_at',
         'updated_at',

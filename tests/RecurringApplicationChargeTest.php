@@ -3,8 +3,8 @@
 namespace Dan\Shopify\Test;
 
 use Carbon\Carbon;
-use PHPUnit\Framework\TestCase;
 use Dan\Shopify\Models\RecurringApplicationCharge;
+use PHPUnit\Framework\TestCase;
 
 class RecurringApplicationChargeTest extends TestCase
 {
@@ -37,19 +37,19 @@ class RecurringApplicationChargeTest extends TestCase
             'activated_on' => '2022-09-20T12:00:00-00:00',
             'billing_on' => '2022-09-28T12:00:00-00:00',
             'cancelled_on' => '2022-09-30T12:00:00-00:00',
-            'capped_amount' => "100",
-            'confirmation_url' => "https://jsmith.myshopify.com/admin/charges/confirm_recurring_application_charge?id=654381177&amp;signature=BAhpBHkQASc%3D--374c02da2ea0371b23f40781b8a6d5f4a520e77b",
+            'capped_amount' => '100',
+            'confirmation_url' => 'https://jsmith.myshopify.com/admin/charges/confirm_recurring_application_charge?id=654381177&amp;signature=BAhpBHkQASc%3D--374c02da2ea0371b23f40781b8a6d5f4a520e77b',
             'created_at' => '2022-09-20T12:00:00-00:00',
             'id' => 675931192,
-            'name' => "Super Duper Expensive action",
-            'price' => "100.00",
-            'return_url' => "http://super-duper.shopifyapps.com",
-            'status' => "accepted",
-            'terms' => "$1 for 1000 emails",
+            'name' => 'Super Duper Expensive action',
+            'price' => '100.00',
+            'return_url' => 'http://super-duper.shopifyapps.com',
+            'status' => 'accepted',
+            'terms' => '$1 for 1000 emails',
             'test' => null,
             'trial_days' => 7,
             'trial_ends_on' => '2022-09-27T12:00:00-00:00',
-            'updated_at' => '2022-09-20T12:00:00-00:00'
+            'updated_at' => '2022-09-20T12:00:00-00:00',
         ]);
     }
 }

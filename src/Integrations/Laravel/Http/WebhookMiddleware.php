@@ -19,24 +19,22 @@ class WebhookMiddleware
     /** @var \Illuminate\Http\Request */
     protected $request;
 
-    /** @var string|null $shop */
+    /** @var string|null */
     protected $shop = null;
 
-    /** @var string|null $hmac */
+    /** @var string|null */
     protected $hmac = null;
 
-    /** @var string|null $data */
+    /** @var string|null */
     protected $data = null;
 
-    /** @var \stdClass|null $json */
+    /** @var \stdClass|null */
     protected $json = null;
 
     /**
      * Handle an incoming request.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Closure                 $next
-     *
+     * @param  \Illuminate\Http\Request  $request
      * @return JsonResponse|mixed
      */
     public function handle($request, Closure $next)
@@ -118,8 +116,7 @@ class WebhookMiddleware
     }
 
     /**
-     * @param int $json_error_code
-     *
+     * @param  int  $json_error_code
      * @return JsonResponse
      */
     protected function errorWithJsonDecoding($json_error_code)
@@ -184,11 +181,11 @@ class WebhookMiddleware
     protected function getErrorDetails()
     {
         return [
-            'path'    => request()->path(),
+            'path' => request()->path(),
             'success' => 'false',
-            'shop'    => $this->shop,
-            'hmac'    => $this->hmac,
-            'data'    => $this->data,
+            'shop' => $this->shop,
+            'hmac' => $this->hmac,
+            'data' => $this->data,
         ];
     }
 

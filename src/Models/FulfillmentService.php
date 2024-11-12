@@ -19,27 +19,27 @@ namespace Dan\Shopify\Models;
  */
 class FulfillmentService extends AbstractModel
 {
-    /** @var string $resource_name */
+    /** @var string */
     public static $resource_name = 'fulfillment_service';
 
-    /** @var string $resource_name_many */
+    /** @var string */
     public static $resource_name_many = 'fulfillment_services';
 
-    /** @var array $dates */
+    /** @var array */
     protected $dates = [];
 
-    /** @var array $casts */
+    /** @var array */
     protected $casts = [
-        'id'                       => 'integer',
-        'name'                     => 'string',
-        'handle'                   => 'string',
-        'email'                    => 'string',
-        'include_pending_stock'    => 'bool',
+        'id' => 'integer',
+        'name' => 'string',
+        'handle' => 'string',
+        'email' => 'string',
+        'include_pending_stock' => 'bool',
         'requires_shipping_method' => 'bool',
-        'service_name'             => 'string',
-        'inventory_management'     => 'bool',
-        'tracking_support'         => 'bool',
-        'provider_id'              => 'integer',
-        'location_id'              => 'integer',
+        'service_name' => 'string',
+        'inventory_management' => 'bool',
+        'tracking_support' => 'bool',
+        'provider_id' => 'integer',
+        'location_id' => 'integer',
     ];
 }

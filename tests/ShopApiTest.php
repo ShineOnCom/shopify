@@ -16,6 +16,7 @@ class ShopApiTest extends TestCase
      * Retrieves a list of products.
      *
      * @test
+     *
      * @throws Throwable
      */
     public function it_gets_the_shop_data()

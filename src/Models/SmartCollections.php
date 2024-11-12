@@ -22,33 +22,41 @@ use Carbon\Carbon;
  */
 class SmartCollections extends AbstractModel
 {
-    /** @var string $resource_name */
+    /** @var string */
     public static $resource_name = 'smart_collection';
 
-    /** @var string $resource_name_many */
+    /** @var string */
     public static $resource_name_many = 'smart_collections';
 
     /** Published Scope constants */
     public const PUBLISHED_SCOPE_GLOBAL = 'global';
+
     public const PUBLISHED_SCOPE_WEB = 'web';
 
     /** Sort Order constants */
     public const SORT_ORDER_ALPHA_ASC = 'alpha-asc';
+
     public const SORT_ORDER_ALPHA_DES = 'alpha-des';
+
     public const SORT_ORDER_BEST_SELLING = 'best-selling';
+
     public const SORT_ORDER_CREATED = 'created';
+
     public const SORT_ORDER_CREATED_DESC = 'created-desc';
+
     public const SORT_ORDER_MANUAL = 'manual';
+
     public const SORT_ORDER_PRICE_ASC = 'price-asc';
+
     public const SORT_ORDER_PRICE_DESC = 'price-desc';
 
-    /** @var array $public_scopes */
+    /** @var array */
     public static $public_scopes = [
         self::PUBLISHED_SCOPE_GLOBAL,
         self::PUBLISHED_SCOPE_WEB,
     ];
 
-    /** @var array $sort_orders */
+    /** @var array */
     public static $sort_orders = [
         self::SORT_ORDER_ALPHA_ASC,
         self::SORT_ORDER_ALPHA_DES,
@@ -60,7 +68,7 @@ class SmartCollections extends AbstractModel
         self::SORT_ORDER_PRICE_DESC,
     ];
 
-    /** @var array $casts */
+    /** @var array */
     protected $casts = [
         'image' => 'array',
         'rules' => 'array',

@@ -17,12 +17,13 @@ class ProductsApiTest extends TestCase
      * Retrieves a list of products.
      *
      * @test
+     *
      * @throws Throwable
      */
     public function it_gets_a_list_of_products()
     {
         Http::fake([
-            '*admin/products.json' => ProductFactory::create(2)
+            '*admin/products.json' => ProductFactory::create(2),
         ]);
 
         $response = (new Shopify('shop', 'token'))->products->get();
@@ -40,12 +41,13 @@ class ProductsApiTest extends TestCase
      * Retrieve a count of all products.
      *
      * @test
+     *
      * @throws Throwable
      */
     public function it_gets_a_count_of_products()
     {
         Http::fake([
-            '*admin/products/count.json' => ['count' => 2]
+            '*admin/products/count.json' => ['count' => 2],
         ]);
 
         $response = (new Shopify('shop', 'token'))->products->count();
@@ -63,12 +65,13 @@ class ProductsApiTest extends TestCase
      * Retrieves a single product.
      *
      * @test
+     *
      * @throws Throwable
      */
     public function it_gets_a_product()
     {
         Http::fake([
-            '*admin/products/123.json' => ProductFactory::create(1, ['id' => 123])
+            '*admin/products/123.json' => ProductFactory::create(1, ['id' => 123]),
         ]);
 
         $response = (new Shopify('shop', 'token'))->products->find(123);
@@ -86,16 +89,17 @@ class ProductsApiTest extends TestCase
      * Creates a new product.
      *
      * @test
+     *
      * @throws Throwable
      */
     public function it_creates_a_new_product()
     {
         Http::fake([
-            '*admin/products.json' => ProductFactory::create(1, ['id' => 123, 'title' => 'some title'])
+            '*admin/products.json' => ProductFactory::create(1, ['id' => 123, 'title' => 'some title']),
         ]);
 
         $response = (new Shopify('shop', 'token'))->products->post([
-            'title' => 'some title'
+            'title' => 'some title',
         ]);
 
         Http::assertSent(function (Request $request) {
@@ -112,16 +116,17 @@ class ProductsApiTest extends TestCase
      * Updates a product and its variants and images.
      *
      * @test
+     *
      * @throws Throwable
      */
     public function it_updates_a_product()
     {
         Http::fake([
-            '*admin/products/123.json' => ProductFactory::create(1, ['title' => 'new title'])
+            '*admin/products/123.json' => ProductFactory::create(1, ['title' => 'new title']),
         ]);
 
         $response = (new Shopify('shop', 'token'))->products(123)->put([
-            'title' => 'new title'
+            'title' => 'new title',
         ]);
 
         Http::assertSent(function (Request $request) {
@@ -137,6 +142,7 @@ class ProductsApiTest extends TestCase
      * Delete a product along with all its variants and images.
      *
      * @test
+     *
      * @throws Throwable
      */
     public function it_deletes_a_product()

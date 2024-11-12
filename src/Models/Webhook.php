@@ -16,79 +16,127 @@ namespace Dan\Shopify\Models;
  */
 class Webhook extends AbstractModel
 {
-    /** @var string $resource_name */
+    /** @var string */
     public static $resource_name = 'webhook';
 
-    /** @var string $resource_name_many */
+    /** @var string */
     public static $resource_name_many = 'webhooks';
 
-    /** @var array $dates */
+    /** @var array */
     protected $dates = [
         'created_at',
         'updated_at',
     ];
 
-    /** @var array $casts */
+    /** @var array */
     protected $casts = [
-        'id'                   => 'integer',
-        'address'              => 'string',
-        'topic'                => 'string',
-        'fields'               => 'array',
-        'format'               => 'string',
+        'id' => 'integer',
+        'address' => 'string',
+        'topic' => 'string',
+        'fields' => 'array',
+        'format' => 'string',
         'metafield_namespaces' => 'array',
     ];
 
     const CARTS_CREATE = 'carts/create';
+
     const CARTS_UPDATE = 'carts/update';
+
     const CHECKOUTS_CREATE = 'checkouts/create';
+
     const CHECKOUTS_DELETE = 'checkouts/delete';
+
     const CHECKOUTS_UPDATE = 'checkouts/update';
+
     const COLLECTION_LISTINGS_ADD = 'collection_listings/add';
+
     const COLLECTION_LISTINGS_REMOVE = 'collection_listings/remove';
+
     const COLLECTION_LISTINGS_UPDATE = 'collection_listings/update';
+
     const COLLECTIONS_CREATE = 'collections/create';
+
     const COLLECTIONS_DELETE = 'collections/delete';
+
     const COLLECTIONS_UPDATE = 'collections/update';
+
     const CUSTOMER_GROUPS_CREATE = 'customer_groups/create';
+
     const CUSTOMER_GROUPS_DELETE = 'customer_groups/delete';
+
     const CUSTOMER_GROUPS_UPDATE = 'customer_groups/update';
+
     const CUSTOMERS_CREATE = 'customers/create';
+
     const CUSTOMERS_DELETE = 'customers/delete';
+
     const CUSTOMERS_DISABLE = 'customers/disable';
+
     const CUSTOMERS_ENABLE = 'customers/enable';
+
     const CUSTOMERS_UPDATE = 'customers/update';
+
     const DISPUTES_CREATE = 'disputes/create';
+
     const DISPUTES_UPDATE = 'disputes/update';
+
     const DRAFT_ORDERS_CREATE = 'draft_orders/create';
+
     const DRAFT_ORDERS_DELETE = 'draft_orders/delete';
+
     const DRAFT_ORDERS_UPDATE = 'draft_orders/update';
+
     const FULFILLMENT_EVENTS_CREATE = 'fulfillment_events/create';
+
     const FULFILLMENT_EVENTS_DELETE = 'fulfillment_events/delete';
+
     const FULFILLMENTS_CREATE = 'fulfillments/create';
+
     const FULFILLMENTS_UPDATE = 'fulfillments/update';
+
     const ORDER_TRANSACTIONS_CREATE = 'order_transactions/create';
+
     const ORDERS_CANCELLED = 'orders/cancelled';
+
     const ORDERS_CREATE = 'orders/create';
+
     const ORDERS_DELETE = 'orders/delete';
+
     const ORDERS_FULFILLED = 'orders/fulfilled';
+
     const ORDERS_PAID = 'orders/paid';
+
     const ORDERS_PARTIALLY_FULFILLED = 'orders/partially_fulfilled';
+
     const ORDERS_UPDATED = 'orders/updated';
+
     const PRODUCT_LISTINGS_ADD = 'product_listings/add';
+
     const PRODUCT_LISTINGS_REMOVE = 'product_listings/remove';
+
     const PRODUCT_LISTINGS_UPDATE = 'product_listings/update';
+
     const PRODUCTS_CREATE = 'products/create';
+
     const PRODUCTS_DELETE = 'products/delete';
+
     const PRODUCTS_UPDATE = 'products/update';
+
     const REFUNDS_CREATE = 'refunds/create';
+
     const SHOP_UPDATE = 'shop/update';
+
     const APP_UNINSTALLED = 'app/uninstalled';
+
     const THEMES_CREATE = 'themes/create';
+
     const THEMES_DELETE = 'themes/delete';
+
     const THEMES_PUBLISH = 'themes/publish';
+
     const THEMES_UPDATE = 'themes/update';
 
-    /** @var array $topics */
+    /** @var array */
     public static $topics = [
         self::CARTS_CREATE,
         self::CARTS_UPDATE,

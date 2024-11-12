@@ -25,42 +25,46 @@ namespace Dan\Shopify\Models;
  */
 class Product extends AbstractModel
 {
-    /** @var string $resource_name */
+    /** @var string */
     public static $resource_name = 'product';
 
-    /** @var string $resource_name_many */
+    /** @var string */
     public static $resource_name_many = 'products';
 
-    /** @var array $dates */
+    /** @var array */
     protected $dates = [
         'created_at',
         'updated_at',
         'published_at',
     ];
 
-    /** @var array $casts */
+    /** @var array */
     protected $casts = [
         'variants' => 'array',
-        'options'  => 'array',
-        'images'   => 'array',
-        'image'    => 'object',
+        'options' => 'array',
+        'images' => 'array',
+        'image' => 'object',
     ];
 
     const PUBLISHED_SCOPE_GLOBAL = 'global';
+
     const PUBLISHED_SCOPE_WEB = 'web';
 
-    /** @var array $published_scopes */
+    /** @var array */
     public static $published_scopes = [
         self::PUBLISHED_SCOPE_GLOBAL,
         self::PUBLISHED_SCOPE_WEB,
     ];
 
     const WEIGHT_UNIT_GRAMS = 'g';
+
     const WEIGHT_UNIT_KG = 'kg';
+
     const WEIGHT_UNIT_LB = 'lb';
+
     const WEIGHT_UNIT_OUNCE = 'oz';
 
-    /** @var array $weight_units */
+    /** @var array */
     public static $weight_units = [
         self::WEIGHT_UNIT_GRAMS,
         self::WEIGHT_UNIT_KG,
@@ -68,9 +72,6 @@ class Product extends AbstractModel
         self::WEIGHT_UNIT_OUNCE,
     ];
 
-    /**
-     * @return array
-     */
     public function getTagsAsArray(): array
     {
         return explode(', ', $this->tags);

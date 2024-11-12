@@ -9,47 +9,48 @@ use DateTime;
 use DateTimeInterface;
 use Exception;
 use JsonSerializable;
+
 /**
  * Class AbstractModel.
  *
  * An Eloquent approach to storing and manipulating data for the Shopify Api.
  */
-abstract class AbstractModel implements JsonSerializable, ArrayAccess
+abstract class AbstractModel implements ArrayAccess, JsonSerializable
 {
-    /** @var string $resource_name */
+    /** @var string */
     public static $resource_name;
 
-    /** @var string $resource_name_many */
+    /** @var string */
     public static $resource_name_many;
 
-    /** @var string $identifier */
+    /** @var string */
     public static $identifier = 'id';
 
-    /** @var array $omit_on_replication */
+    /** @var array */
     public static $omit_on_replication = ['id', 'updated_at', 'created_at'];
 
-    /** @var array $original */
+    /** @var array */
     protected $original = [];
 
-    /** @var array $attributes */
+    /** @var array */
     protected $attributes = [];
 
-    /** @var string $date_format */
+    /** @var string */
     protected $date_format = 'c';
 
-    /** @var array $dates */
+    /** @var array */
     protected $dates = [];
 
-    /** @var array $casts */
+    /** @var array */
     protected $casts = [];
 
-    /** @var bool $exists */
+    /** @var bool */
     public $exists = false;
 
     /**
      * AbstractModel constructor.
      *
-     * @param array|object $data
+     * @param  array|object  $data
      */
     public function __construct($data = [])
     {
@@ -83,8 +84,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     }
 
     /**
-     * @param array $attributes
-     *
+     * @param  array  $attributes
      * @return $this
      */
     public function fill($attributes)
@@ -99,8 +99,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Sync the original attributes with the current.
      *
-     * @param array $attributes
-     *
+     * @param  array  $attributes
      * @return $this
      */
     public function syncOriginal($attributes = [])
@@ -123,8 +122,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Get an attribute from the model.
      *
-     * @param string $key
-     *
+     * @param  string  $key
      * @return mixed
      */
     public function getAttribute($key)
@@ -145,8 +143,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Get an attribute from the $attributes array.
      *
-     * @param string $key
-     *
+     * @param  string  $key
      * @return mixed
      */
     protected function getAttributeFromArray($key)
@@ -159,9 +156,8 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Get the model's original attribute values.
      *
-     * @param string|null $key
-     * @param mixed       $default
-     *
+     * @param  string|null  $key
+     * @param  mixed  $default
      * @return mixed|array
      */
     public function getOriginal($key = null, $default = null)
@@ -193,8 +189,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Determine if the new and old values for a given key are numerically equivalent.
      *
-     * @param string $key
-     *
+     * @param  string  $key
      * @return bool
      */
     protected function originalIsNumericallyEquivalent($key)
@@ -213,8 +208,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Get a plain attribute (not a relationship).
      *
-     * @param string $key
-     *
+     * @param  string  $key
      * @return mixed
      */
     public function getAttributeValue($key)
@@ -248,8 +242,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Determine if a get mutator exists for an attribute.
      *
-     * @param string $key
-     *
+     * @param  string  $key
      * @return bool
      */
     public function hasGetMutator($key)
@@ -260,9 +253,8 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Get the value of an attribute using its mutator.
      *
-     * @param string $key
-     * @param mixed  $value
-     *
+     * @param  string  $key
+     * @param  mixed  $value
      * @return mixed
      */
     protected function mutateAttribute($key, $value)
@@ -273,8 +265,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Determine if a set mutator exists for an attribute.
      *
-     * @param string $key
-     *
+     * @param  string  $key
      * @return bool
      */
     public function hasSetMutator($key)
@@ -285,9 +276,8 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Set a given attribute on the model.
      *
-     * @param string $key
-     * @param mixed  $value
-     *
+     * @param  string  $key
+     * @param  mixed  $value
      * @return $this
      */
     public function setAttribute($key, $value)
@@ -316,9 +306,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Set the array of model attributes. No checking is done.
      *
-     * @param array $attributes
-     * @param bool  $sync
-     *
+     * @param  bool  $sync
      * @return $this
      */
     public function setRawAttributes(array $attributes, $sync = false)
@@ -335,11 +323,10 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Return a timestamp as DateTime object.
      *
-     * @param mixed $value
+     * @param  mixed  $value
+     * @return Carbon
      *
      * @throws Exception
-     *
-     * @return Carbon
      */
     protected function asDateTime($value)
     {
@@ -384,11 +371,10 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Convert a DateTime to a storable string.
      *
-     * @param DateTime|int $value
+     * @param  DateTime|int  $value
+     * @return string
      *
      * @throws Exception
-     *
-     * @return string
      */
     public function fromDateTime($value)
     {
@@ -400,8 +386,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Determine if the given value is a standard date format.
      *
-     * @param string $value
-     *
+     * @param  string  $value
      * @return bool
      */
     protected function isStandardDateFormat($value)
@@ -422,12 +407,11 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Cast an attribute to a native PHP type.
      *
-     * @param string $key
-     * @param mixed $value
+     * @param  string  $key
+     * @param  mixed  $value
+     * @return mixed
      *
      * @throws Exception
-     *
-     * @return mixed
      */
     protected function castAttribute($key, $value)
     {
@@ -463,8 +447,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Get the type of cast for a model attribute.
      *
-     * @param string $key
-     *
+     * @param  string  $key
      * @return string
      */
     protected function getCastType($key)
@@ -509,7 +492,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     }
 
     /**
-     * @param string $data
+     * @param  string  $data
      */
     public function __unserialize(array $data): void
     {
@@ -535,9 +518,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Determine if the given attribute exists.
      *
-     * @param mixed $offset
-     *
-     * @return bool
+     * @param  mixed  $offset
      */
     public function offsetExists($offset): bool
     {
@@ -547,9 +528,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Get the value for a given offset.
      *
-     * @param mixed $offset
-     *
-     * @return mixed
+     * @param  mixed  $offset
      */
     public function offsetGet($offset): mixed
     {
@@ -559,10 +538,8 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Set the value for a given offset.
      *
-     * @param mixed $offset
-     * @param mixed $value
-     *
-     * @return void
+     * @param  mixed  $offset
+     * @param  mixed  $value
      */
     public function offsetSet($offset, $value): void
     {
@@ -572,9 +549,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Unset the value for a given offset.
      *
-     * @param mixed $offset
-     *
-     * @return void
+     * @param  mixed  $offset
      */
     public function offsetUnset($offset): void
     {
@@ -584,8 +559,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Dynamically retrieve attributes on the model.
      *
-     * @param string $key
-     *
+     * @param  string  $key
      * @return mixed
      */
     public function __get($key)
@@ -596,9 +570,8 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Dynamically set attributes on the model.
      *
-     * @param string $key
-     * @param mixed  $value
-     *
+     * @param  string  $key
+     * @param  mixed  $value
      * @return void
      */
     public function __set($key, $value)
@@ -609,8 +582,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Determine if an attribute or relation exists on the model.
      *
-     * @param string $key
-     *
+     * @param  string  $key
      * @return bool
      */
     public function __isset($key)
@@ -621,8 +593,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Unset an attribute on the model.
      *
-     * @param string $key
-     *
+     * @param  string  $key
      * @return void
      */
     public function __unset($key)
@@ -641,11 +612,7 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     }
 
     /**
-     * @param $attribute
-     * @param $prop
-     * @param $value
-     * @param bool $unset
-     *
+     * @param  bool  $unset
      * @return $this
      */
     public function prop($attribute, $prop, $value, $unset = false)
@@ -666,8 +633,6 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Helper for pushing to an attribute that is an array.
      *
-     * @param $attribute
-     * @param $args
      *
      * @return int
      */
@@ -689,7 +654,6 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Helper for popping from an attribute that is an array.
      *
-     * @param $attribute
      *
      * @return mixed|null
      */
@@ -705,8 +669,6 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Helper for unshifting to an attribute that is array.
      *
-     * @param $attribute
-     * @param $args
      *
      * @return int
      */
@@ -728,7 +690,6 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     /**
      * Helper for shifting from an attribute that is an array.
      *
-     * @param $attribute
      *
      * @return mixed|null
      */
@@ -762,8 +723,6 @@ abstract class AbstractModel implements JsonSerializable, ArrayAccess
     }
 
     /**
-     * @param array $response
-     *
      * @return array
      */
     public function transformGraphQLResponse(array $response)

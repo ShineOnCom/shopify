@@ -3,10 +3,10 @@
 namespace Dan\Shopify\Test;
 
 use Dan\Shopify\Shopify;
-use Illuminate\Support\Arr;
-use Orchestra\Testbench\TestCase;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use Orchestra\Testbench\TestCase;
 
 class FulfillmentOrdersApiTest extends TestCase
 {

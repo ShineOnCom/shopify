@@ -22,9 +22,10 @@ class FulfillmentOrders extends Endpoint
      * Accept a fulfillment request.
      *
      * @param  array  $payload
+     * @return array|\Dan\Shopify\Models\AbstractModel
+     *
      * @throws \Dan\Shopify\Exceptions\InvalidOrMissingEndpointException
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array|\Dan\Shopify\Models\AbstractModel
      */
     public function accept($payload = [])
     {
@@ -35,9 +36,10 @@ class FulfillmentOrders extends Endpoint
      * Mark a fulfillment order as cancelled.
      *
      * @param  int|null  $id
+     * @return array|\Dan\Shopify\Models\AbstractModel
+     *
      * @throws \Dan\Shopify\Exceptions\InvalidOrMissingEndpointException
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array|\Dan\Shopify\Models\AbstractModel
      */
     public function cancel($id = null)
     {
@@ -50,9 +52,10 @@ class FulfillmentOrders extends Endpoint
      * Marks an in progress fulfillment order as incomplete.
      *
      * @param  array  $payload
+     * @return array|\Dan\Shopify\Models\AbstractModel
+     *
      * @throws \Dan\Shopify\Exceptions\InvalidOrMissingEndpointException
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array|\Dan\Shopify\Models\AbstractModel
      */
     public function close($payload = [])
     {
@@ -63,9 +66,10 @@ class FulfillmentOrders extends Endpoint
      * Move a fulfillment order from one location to another location.
      *
      * @param  array  $payload
+     * @return array|\Dan\Shopify\Models\AbstractModel
+     *
      * @throws \Dan\Shopify\Exceptions\InvalidOrMissingEndpointException
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array|\Dan\Shopify\Models\AbstractModel
      */
     public function move($payload = [])
     {
@@ -76,9 +80,10 @@ class FulfillmentOrders extends Endpoint
      * Marks a scheduled fulfillment order as ready for fulfillment.
      *
      * @param  array  $payload
+     * @return array|\Dan\Shopify\Models\AbstractModel
+     *
      * @throws \Dan\Shopify\Exceptions\InvalidOrMissingEndpointException
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array|\Dan\Shopify\Models\AbstractModel
      */
     public function open($payload = [])
     {
@@ -89,9 +94,10 @@ class FulfillmentOrders extends Endpoint
      * Reject a fulfillment request.
      *
      * @param  array  $payload
+     * @return array|\Dan\Shopify\Models\AbstractModel
+     *
      * @throws \Dan\Shopify\Exceptions\InvalidOrMissingEndpointException
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array|\Dan\Shopify\Models\AbstractModel
      */
     public function reject($payload = [])
     {
@@ -101,9 +107,10 @@ class FulfillmentOrders extends Endpoint
     /**
      * Release the fulfillment hold on a fulfillment order.
      *
+     * @return array|\Dan\Shopify\Models\AbstractModel
+     *
      * @throws \Dan\Shopify\Exceptions\InvalidOrMissingEndpointException
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array|\Dan\Shopify\Models\AbstractModel
      */
     public function release_hold()
     {
@@ -114,9 +121,10 @@ class FulfillmentOrders extends Endpoint
      * Updates the fulfill_at time of a scheduled fulfillment order.
      *
      * @param  array  $payload
+     * @return array|\Dan\Shopify\Models\AbstractModel
+     *
      * @throws \Dan\Shopify\Exceptions\InvalidOrMissingEndpointException
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return array|\Dan\Shopify\Models\AbstractModel
      */
     public function reschedule($payload = [])
     {

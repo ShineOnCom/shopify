@@ -34,9 +34,8 @@ class Util
     /**
      * Convert a string to snake case.
      *
-     * @param string $value
-     * @param string $delimiter
-     *
+     * @param  string  $value
+     * @param  string  $delimiter
      * @return string
      */
     public static function snake($value, $delimiter = '_')
@@ -59,8 +58,7 @@ class Util
     /**
      * Convert a value to camel case.
      *
-     * @param string $value
-     *
+     * @param  string  $value
      * @return string
      */
     public static function camel($value)
@@ -73,8 +71,6 @@ class Util
     }
 
     /**
-     * @param $value
-     *
      * @return mixed
      */
     public static function studly($value)
@@ -93,8 +89,7 @@ class Util
     /**
      * Convert the given string to lower-case.
      *
-     * @param string $value
-     *
+     * @param  string  $value
      * @return string
      */
     public static function lower($value)
@@ -105,9 +100,8 @@ class Util
     /**
      * Flatten a multi-dimensional array into a single level.
      *
-     * @param array $array
-     * @param int   $depth
-     *
+     * @param  array  $array
+     * @param  int  $depth
      * @return array
      */
     public static function flatten($array, $depth = INF)
@@ -124,8 +118,7 @@ class Util
     }
 
     /**
-     * @param string $myshopify_domain
-     *
+     * @param  string  $myshopify_domain
      * @return string
      */
     public static function normalizeDomain($myshopify_domain)
@@ -139,10 +132,9 @@ class Util
     }
 
     /**
-     * @param string $hmac
-     * @param string $token
-     * @param string $data
-     *
+     * @param  string  $hmac
+     * @param  string  $token
+     * @param  string  $data
      * @return bool
      */
     public static function validWebhookHmac($hmac, $token, $data)
@@ -158,10 +150,6 @@ class Util
     }
 
     /**
-     * @param $hmac
-     * @param $secret
-     * @param array $data
-     *
      * @return bool
      */
     public static function validAppHmac($hmac, $secret, array $data)
@@ -186,8 +174,7 @@ class Util
     }
 
     /**
-     * @param int|string|array|\stdClass|\Dan\Shopify\Models\AbstractModel $mixed
-     *
+     * @param  int|string|array|\stdClass|\Dan\Shopify\Models\AbstractModel  $mixed
      * @return int|null
      */
     public static function getKeyFromMixed($mixed)
@@ -206,10 +193,10 @@ class Util
     }
 
     /**
-     * @param string $client_id
-     * @param string $client_secret
-     * @param string $shop
-     * @param string $code
+     * @param  string  $client_id
+     * @param  string  $client_secret
+     * @param  string  $shop
+     * @param  string  $code
      * @return array
      */
     public static function appAccessRequest($client_id, $client_secret, $shop, $code)
@@ -235,10 +222,10 @@ class Util
     }
 
     /**
-     * @param string $client_id
-     * @param string $client_secret
-     * @param string $shop
-     * @param string $code
+     * @param  string  $client_id
+     * @param  string  $client_secret
+     * @param  string  $shop
+     * @param  string  $code
      * @return string|false
      */
     public static function appAccessToken($client_id, $client_secret, $shop, $code)
@@ -249,11 +236,8 @@ class Util
     }
 
     /**
-     * @param $shop
-     * @param $client_id
-     * @param $redirect_uri
-     * @param array $scopes
-     * @param array $attributes
+     * @param  array  $scopes
+     * @param  array  $attributes
      * @return string
      */
     public static function appAuthUrl($shop, $client_id, $redirect_uri, $scopes = [], $attributes = [])
@@ -275,9 +259,6 @@ class Util
     }
 
     /**
-     * @param $hmac
-     * @param $secret
-     * @param $data
      * @return bool
      */
     public static function appValidHmac($hmac, $secret, $data)

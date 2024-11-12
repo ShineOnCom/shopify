@@ -4,7 +4,6 @@ namespace Dan\Shopify;
 
 use Illuminate\Http\Client\Response;
 use JsonSerializable;
-use Psr\Http\Message\MessageInterface;
 
 /**
  * Class RateLimit
@@ -12,21 +11,20 @@ use Psr\Http\Message\MessageInterface;
 class RateLimit implements JsonSerializable
 {
     public const HEADER_CALL_LIMIT = 'X-Shopify-Shop-Api-Call-Limit';
+
     public const HEADER_RETRY_AFTER = 'Retry-After';
 
-    /** @var int $calls */
+    /** @var int */
     protected $calls = 0;
 
-    /** @var int $cap */
+    /** @var int */
     protected $cap = 40;
 
-    /** @var int $retry_after */
+    /** @var int */
     protected $retry_after = 0;
 
     /**
      * RateLimit constructor.
-     *
-     * @param \Illuminate\Http\Client\Response|null $response
      */
     public function __construct(?Response $response)
     {
@@ -56,12 +54,9 @@ class RateLimit implements JsonSerializable
     }
 
     /**
-     * @param callable $exceeded
-     * @param callable $remaining
-     *
      * @return mixed|bool
      */
-    public function exceeded(callable $exceeded = null, callable $remaining = null)
+    public function exceeded(?callable $exceeded = null, ?callable $remaining = null)
     {
         $state = $this->calls >= $this->cap;
 
@@ -77,12 +72,9 @@ class RateLimit implements JsonSerializable
     }
 
     /**
-     * @param callable $remaining
-     * @param callable $exceeded
-     *
      * @return mixed|bool
      */
-    public function remaining(callable $remaining = null, callable $exceeded = null)
+    public function remaining(?callable $remaining = null, ?callable $exceeded = null)
     {
         $state = ($this->cap - $this->calls) > 0;
 
@@ -98,17 +90,15 @@ class RateLimit implements JsonSerializable
     }
 
     /**
-     * @param callable $retry
-     * @param callable $continue
-     *
      * @return int
      */
-    public function retryAfter(callable $retry = null, callable $continue = null)
+    public function retryAfter(?callable $retry = null, ?callable $continue = null)
     {
         $state = $this->retry_after;
 
         if ($state && $retry) {
             sleep($state);
+
             return $retry($this);
         }
 
@@ -120,8 +110,7 @@ class RateLimit implements JsonSerializable
     }
 
     /**
-     * @param mixed $on_this
-     *
+     * @param  mixed  $on_this
      * @return static|Shopify|mixed
      */
     public function wait($on_this = null)
