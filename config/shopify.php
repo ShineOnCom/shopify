@@ -13,6 +13,7 @@ return [
     */
 
     'api_base' => env('SHOPIFY_API_BASE', 'admin/api/2020-07'),
+    'graphql_api_base' => env('SHOPIFY_GRAPHQL_API_BASE', 'admin/api/2023-07'),
 
     /*
     |--------------------------------------------------------------------------

@@ -328,8 +328,7 @@ class Shopify
      */
     public function graphql($query, $variables = null)
     {
-        $uri = static::makeUri('graphql');
-
+        $uri = static::makeUri('graphql', [], [], '', config('shopify.graphql_api_base'));
         $json = ['query' => $query];
         if ($variables) {
             $json['variables'] = $variables;
