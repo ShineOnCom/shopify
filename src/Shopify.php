@@ -777,7 +777,6 @@ class Shopify
             $base = config('shopify.api_base', 'admin');
         }
 
-        dd($base);
         // Is it an entity endpoint?
         if (substr_count(static::$endpoints[$api], '%') == count($ids)) {
             $endpoint = vsprintf(static::$endpoints[$api], $ids);
