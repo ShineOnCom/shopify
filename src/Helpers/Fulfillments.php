@@ -11,7 +11,7 @@ class Fulfillments extends Endpoint
 {
     public function graphQLEnabled()
     {
-        return parent::useGraphQL('fulfillments') || true;
+        return parent::useGraphQL('fulfillments');
     }
 
     public function makeGraphQLQuery(array $ids, array $queue, string $append, ?array $payload = null, bool $mutate = false): array
