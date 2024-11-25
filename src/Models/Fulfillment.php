@@ -2,6 +2,9 @@
 
 namespace Dan\Shopify\Models;
 
+use Dan\Shopify\Util;
+use Illuminate\Support\Arr;
+
 /**
  * Class Fulfillment.
  *
@@ -56,4 +59,14 @@ class Fulfillment extends AbstractModel
         'name' => 'string',
         'admin_graphql_api_id' => 'string',
     ];
+
+    /**
+     * @return array
+     */
+    public function transformGraphQLResponse(array $response)
+    {
+        $response['id'] = Util::getIdFromGid(Arr::get($response, 'data.fulfillmentCreateV2.fulfillment.id'));
+
+        return $response;
+    }
 }

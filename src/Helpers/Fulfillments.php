@@ -3,6 +3,8 @@
 namespace Dan\Shopify\Helpers;
 
 use Dan\Shopify\ArrayGraphQL;
+use Dan\Shopify\Exceptions\InvalidGraphQLCallException;
+use Dan\Shopify\Util;
 
 /**
  * Class Fulfillments.
@@ -14,13 +16,18 @@ class Fulfillments extends Endpoint
         return parent::useGraphQL('fulfillments');
     }
 
-    public function makeGraphQLQuery(array $ids, array $queue, string $append, ?array $payload = null, bool $mutate = false): array
+    public function makeGraphQLQuery(array $ids, array $queue, string $append, $payload = null, bool $mutate = false): array
     {
         if ($mutate) {
             return $this->getFulfillmentMutation($payload);
         }
 
-        return $this->getFulfillmentQuery(100);
+        $fulfillment_id = empty($ids) ? $payload : $ids[0];
+        if (empty($fulfillment_id)) {
+            throw new InvalidGraphQLCallException();
+        }
+
+        return $this->getFulfillmentQuery($fulfillment_id);
     }
 
     private function getFulfillmentFields()
@@ -30,18 +37,7 @@ class Fulfillments extends Endpoint
             'createdAt',
             'estimatedDeliveryAt',
             'inTransitAt',
-            'location' => [
-                'id',
-                'name',
-                'address' => [
-                    'address1',
-                    'address2',
-                    'city',
-                    'country',
-                    'zip',
-                ],
-            ],
-            'fulfillmentLineItems' => [
+            'fulfillmentLineItems($FULFILLMENT_LINE_ITEMS_PER_PAGE)' => [
                 'edges' => [
                     'node' => [
                         'id',
@@ -49,8 +45,10 @@ class Fulfillments extends Endpoint
                         'lineItem' => [
                             'id',
                             'title',
-                            'variantTitle',
-                            'quantity',
+                            'variant' => [
+                                'id',
+                                'title',
+                            ],
                         ],
                     ],
                 ],
@@ -80,13 +78,16 @@ class Fulfillments extends Endpoint
     private function getFulfillmentQuery($fulfillmentId)
     {
         $query = [
-            'query' => [
-                'fulfillment($FULFILLMENT_ID)' => $this->getFulfillmentFields(),
-            ],
+            'fulfillment($FULFILLMENT_ID)' => $this->getFulfillmentFields(),
         ];
 
+        $gid = Util::toGid($fulfillmentId, 'Fulfillment');
+
         return [
-            'query' => ArrayGraphQL::convert($query, ['$FULFILLMENT_ID' => sprintf('id: "gid://shopify/Fulfillment/%s"', $fulfillmentId)]),
+            'query' => ArrayGraphQL::convert($query, [
+                '$FULFILLMENT_ID' => sprintf('id: "%s"', $gid),
+                '$FULFILLMENT_LINE_ITEMS_PER_PAGE' => 'first: 250',
+            ]),
             'variables' => null,
         ];
     }
@@ -96,7 +97,7 @@ class Fulfillments extends Endpoint
         $fulfillment = $payload['fulfillment'];
 
         $query = [
-            'fulfillmentCreate($INPUT)' => [
+            'fulfillmentCreateV2($INPUT)' => [
                 'fulfillment' => $this->getFulfillmentFields(),
                 'userErrors' => [
                     'field',
@@ -107,10 +108,10 @@ class Fulfillments extends Endpoint
 
         $lineItemsByFulfillmentOrder = array_map(function ($row) {
             return [
-                'fulfillmentOrderId' => sprintf('gid://shopify/Fulfillment/%s', $row['fulfillment_order_id']),
+                'fulfillmentOrderId' => Util::toGid($row['fulfillment_order_id'], 'FulfillmentOrder'),
                 'fulfillmentOrderLineItems' => array_map(function ($line) {
                     return [
-                        'id' => sprintf('gid://shopify/FulfillmentOrderLineItem/%s', $line['id']),
+                        'id' => Util::toGid($line['id'], 'FulfillmentOrderLineItem'),
                         'quantity' => $line['quantity'],
                     ];
                 }, $row['fulfillment_order_line_items']),
@@ -132,8 +133,11 @@ class Fulfillments extends Endpoint
 
         $query = ArrayGraphQL::convert(
             $query,
-            ['$INPUT' => 'fulfillment: $fulfillment, message: $message'],
-            'mutation fulfillmentCreate($fulfillment: FulfillmentInput!, $message: String)'
+            [
+                '$INPUT' => 'fulfillment: $fulfillment, message: $message',
+                '$FULFILLMENT_LINE_ITEMS_PER_PAGE' => 'first: 250',
+            ],
+            'mutation fulfillmentCreateV2($fulfillment: FulfillmentV2Input!, $message: String)'
         );
 
         return [

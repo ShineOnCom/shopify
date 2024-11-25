@@ -354,7 +354,7 @@ class Shopify
     /**
      * @throws GraphQLEnabledWithMissingQueriesException
      */
-    private function withGraphQL(string $append, ?array $payload = null, bool $mutate = false): array
+    private function withGraphQL(string $append, $payload = null, bool $mutate = false): array
     {
         if ($this->graphQLEnabled()) {
             $queryAndVariables = $this->{$this->api}->makeGraphQLQuery($this->ids, $this->queue, $append, $payload, $mutate);
