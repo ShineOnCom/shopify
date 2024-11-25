@@ -2,8 +2,10 @@
 
 namespace Dan\Shopify;
 
+use App\Utils\Str;
 use Dan\Shopify\Models\AbstractModel;
 use GuzzleHttp\Client;
+use Illuminate\Support\Arr;
 
 /**
  * Class Util.
@@ -281,5 +283,21 @@ class Util
     {
         return function_exists('app')
             && preg_match('/lumen/i', app()->version());
+    }
+
+    public static function toGid(string $id, string $resource)
+    {
+        return Str::startsWith($id, 'gid://')
+            ? $id
+            : sprintf('gid://shopify/%s/%s', $resource, $id);
+    }
+
+    public static function getIdFromGid(string $id)
+    {
+        if (empty($id)) {
+            return null;
+        }
+
+        return Arr::last(explode('/', $id));
     }
 }
