@@ -285,14 +285,14 @@ class Util
             && preg_match('/lumen/i', app()->version());
     }
 
-    public static function toGid(string $id, string $resource)
+    public static function toGid(?string $id, string $resource): ?string
     {
         return Str::startsWith($id, 'gid://')
             ? $id
             : sprintf('gid://shopify/%s/%s', $resource, $id);
     }
 
-    public static function getIdFromGid(string $id)
+    public static function getIdFromGid(?string $id): ?string
     {
         if (empty($id)) {
             return null;

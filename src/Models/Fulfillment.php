@@ -65,7 +65,7 @@ class Fulfillment extends AbstractModel
      */
     public function transformGraphQLResponse(array $response)
     {
-        $response['id'] = Util::getIdFromGid(Arr::get($response, 'data.fulfillmentCreateV2.fulfillment.id'));
+        $response['id'] = Util::getIdFromGid(Arr::get($response, 'data.fulfillmentCreateV2.fulfillment.id')) ?? Util::getIdFromGid(Arr::get($response, 'data.fulfillment.id'));
 
         return $response;
     }
