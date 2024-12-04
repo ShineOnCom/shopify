@@ -3,7 +3,7 @@
 namespace Dan\Shopify\Helpers;
 
 use Dan\Shopify\ArrayGraphQL;
-use Dan\Shopify\Exceptions\InvalidGraphQLCallException;
+use Dan\Shopify\DTOs\RequestArgumentDTO;
 use Dan\Shopify\Util;
 
 /**
@@ -16,18 +16,13 @@ class Fulfillments extends Endpoint
         return parent::useGraphQL('fulfillments');
     }
 
-    public function makeGraphQLQuery(array $ids, array $queue, string $append, $payload = null, bool $mutate = false): array
+    public function makeGraphQLQuery(RequestArgumentDTO $dto): array
     {
-        if ($mutate) {
-            return $this->getFulfillmentMutation($payload);
+        if ($dto->mutate) {
+            return $this->getFulfillmentMutation($dto->payload);
         }
 
-        $fulfillment_id = empty($ids) ? $payload : $ids[0];
-        if (empty($fulfillment_id)) {
-            throw new InvalidGraphQLCallException();
-        }
-
-        return $this->getFulfillmentQuery($fulfillment_id);
+        return $this->getFulfillmentQuery($dto->getResourceId());
     }
 
     private function getFulfillmentFields()

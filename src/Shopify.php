@@ -3,6 +3,7 @@
 namespace Dan\Shopify;
 
 use BadMethodCallException;
+use Dan\Shopify\DTOs\RequestArgumentDTO;
 use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
 use Dan\Shopify\Exceptions\InvalidOrMissingEndpointException;
 use Dan\Shopify\Exceptions\ModelNotFoundException;
@@ -354,10 +355,12 @@ class Shopify
     /**
      * @throws GraphQLEnabledWithMissingQueriesException
      */
-    private function withGraphQL(string $append, $payload = null, bool $mutate = false): array
+    private function withGraphQL($payload = null, bool $mutate = false): array
     {
         if ($this->graphQLEnabled()) {
-            $queryAndVariables = $this->{$this->api}->makeGraphQLQuery($this->ids, $this->queue, $append, $payload, $mutate);
+            $queryAndVariables = $this->{$this->api}->makeGraphQLQuery(
+                new RequestArgumentDTO($mutate, $payload, $this->queue, $this->ids)
+            );
 
             return (new static::$resource_models[$this->api]())
                 ->transformGraphQLResponse($this->graphql($queryAndVariables['query'], $queryAndVariables['variables']));
@@ -379,7 +382,7 @@ class Shopify
     public function get($query = [], $append = '')
     {
         if ($this->graphQLEnabled()) {
-            return $this->withGraphQL($append, $query);
+            return $this->withGraphQL($query);
         }
 
         $api = $this->api;
@@ -515,7 +518,7 @@ class Shopify
     {
         $payload = $this->normalizePayload($payload);
         if ($this->graphQLEnabled()) {
-            return $this->withGraphQL($append, $payload, true);
+            return $this->withGraphQL($payload, true);
         }
 
         $api = $this->api;
