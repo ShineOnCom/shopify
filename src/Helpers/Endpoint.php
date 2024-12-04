@@ -2,6 +2,7 @@
 
 namespace Dan\Shopify\Helpers;
 
+use Dan\Shopify\DTOs\RequestArgumentDTO;
 use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
 use Dan\Shopify\Exceptions\InvalidOrMissingEndpointException;
 use Dan\Shopify\Shopify;
@@ -131,7 +132,7 @@ abstract class Endpoint
     /**
      * @return array{query: string, variables: array}
      */
-    public function makeGraphQLQuery(array $ids, array $queue, string $append, ?array $payload = null, bool $mutate = false): array
+    public function makeGraphQLQuery(RequestArgumentDTO $dto): array
     {
         throw new GraphQLEnabledWithMissingQueriesException('Please override makeGraphQLQuery in child class');
     }
