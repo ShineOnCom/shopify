@@ -27,6 +27,11 @@ final class RequestArgumentDTO
             return $this->arguments[0];
         }
 
-        throw new InvalidGraphQLCallException();
+        throw new InvalidGraphQLCallException('Resource ID not present');
+    }
+
+    public function findResourceIdInQueue(string $resource)
+    {
+        return '6181861654832';
     }
 }

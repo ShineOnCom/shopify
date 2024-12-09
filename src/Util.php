@@ -300,4 +300,9 @@ class Util
 
         return Arr::last(explode('/', $id));
     }
+
+    public static function toGraphQLIdParam(?string $id, string $resource): string
+    {
+        return sprintf('id: "%s"', Util::toGid($id, $resource));
+    }
 }

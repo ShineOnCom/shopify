@@ -2,7 +2,10 @@
 
 namespace Dan\Shopify\Helpers;
 
-use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
+use Dan\Shopify\ArrayGraphQL;
+use Dan\Shopify\DTOs\RequestArgumentDTO;
+use Dan\Shopify\Exceptions\InvalidGraphQLCallException;
+use Dan\Shopify\Util;
 
 class FulfillmentOrders extends Endpoint
 {
@@ -11,36 +14,129 @@ class FulfillmentOrders extends Endpoint
         return parent::useGraphQL('fulfillment_orders');
     }
 
-    public function ensureGraphQLSupport(): void
+    public function makeGraphQLQuery(RequestArgumentDTO $dto): array
     {
-        if ($this->graphQLEnabled()) {
-            throw new GraphQLEnabledWithMissingQueriesException();
+        if ($dto->mutate) {
+            return $this->getMutation($dto->payload);
         }
+
+        return $this->getQuery($dto->findResourceIdInQueue('order'));
     }
 
-    /**
-     * Accept a fulfillment request.
-     *
-     * @param  array  $payload
-     * @return array|\Dan\Shopify\Models\AbstractModel
-     *
-     * @throws \Dan\Shopify\Exceptions\InvalidOrMissingEndpointException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
+    private function getFields()
+    {
+        return [
+            'order($ORDER_ID)' => [
+                'id',
+                'fulfillmentOrders($PER_PAGE)' => [
+                    'edges' => [
+                        'node' => [
+                            'id',
+                            'createdAt',
+                            'updatedAt',
+                            'assignedLocation' => [
+                                'name',
+                                'address1',
+                                'address2',
+                                'city',
+                                'countryCode',
+                                'phone',
+                                'province',
+                                'zip',
+                            ],
+                            'requestStatus',
+                            'status',
+                            'fulfillAt',
+                            'supportedActions' => [
+                                'action',
+                            ],
+                            'destination' => [
+                                'id',
+                                'address1',
+                                'address2',
+                                'city',
+                                'company',
+                                'countryCode',
+                                'email',
+                                'firstName',
+                                'lastName',
+                                'phone',
+                                'province',
+                                'zip',
+                            ],
+                            'internationalDuties' => [
+                                'incoterm',
+                            ],
+                            'lineItems($PER_PAGE)' => [
+                                'edges' => [
+                                    'node' => [
+                                        'id',
+                                        'totalQuantity',
+                                        'remainingQuantity',
+                                        'lineItem' => [
+                                            'id',
+                                            'variant' => [
+                                                'id',
+                                            ],
+                                        ],
+                                        'inventoryItemId',
+                                    ],
+                                ],
+                            ],
+                            'fulfillmentHolds' => [
+                                'reason',
+                                'reasonNotes',
+                                'displayReason',
+                                'heldBy',
+                                'heldByRequestingApp',
+                            ],
+                            'fulfillBy',
+                            'deliveryMethod' => [
+                                'id',
+                                'methodType',
+                                'minDeliveryDateTime',
+                                'maxDeliveryDateTime',
+                            ],
+                            'merchantRequests($PER_PAGE)' => [
+                                'edges' => [
+                                    'node' => [
+                                        'id',
+                                        'kind',
+                                        'message',
+                                        'requestOptions',
+                                        'responseData',
+                                        'sentAt',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    private function getQuery($orderId = 0)
+    {
+        return [
+            'query' => ArrayGraphQL::convert($this->getFields(), [
+                '$ORDER_ID' => Util::toGraphQLIdParam($orderId, 'Order'),
+                '$PER_PAGE' => 'first: 100',
+            ]),
+            'variables' => null,
+        ];
+    }
+
+    private function getMutation($payload): array
+    {
+        throw new InvalidGraphQLCallException('WIP');
+    }
+
     public function accept($payload = [])
     {
         return $this->client->post($payload, 'fulfillment_request/accept');
     }
 
-    /**
-     * Mark a fulfillment order as cancelled.
-     *
-     * @param  int|null  $id
-     * @return array|\Dan\Shopify\Models\AbstractModel
-     *
-     * @throws \Dan\Shopify\Exceptions\InvalidOrMissingEndpointException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
     public function cancel($id = null)
     {
         $path = is_null($id) ? 'cancel' : "{$id}/cancel";
@@ -48,84 +144,31 @@ class FulfillmentOrders extends Endpoint
         return $this->client->post([], $path);
     }
 
-    /**
-     * Marks an in progress fulfillment order as incomplete.
-     *
-     * @param  array  $payload
-     * @return array|\Dan\Shopify\Models\AbstractModel
-     *
-     * @throws \Dan\Shopify\Exceptions\InvalidOrMissingEndpointException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
     public function close($payload = [])
     {
         return $this->client->post($payload, 'close');
     }
 
-    /**
-     * Move a fulfillment order from one location to another location.
-     *
-     * @param  array  $payload
-     * @return array|\Dan\Shopify\Models\AbstractModel
-     *
-     * @throws \Dan\Shopify\Exceptions\InvalidOrMissingEndpointException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
     public function move($payload = [])
     {
         return $this->client->post($payload, 'move');
     }
 
-    /**
-     * Marks a scheduled fulfillment order as ready for fulfillment.
-     *
-     * @param  array  $payload
-     * @return array|\Dan\Shopify\Models\AbstractModel
-     *
-     * @throws \Dan\Shopify\Exceptions\InvalidOrMissingEndpointException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
     public function open($payload = [])
     {
         return $this->client->post($payload, 'open');
     }
 
-    /**
-     * Reject a fulfillment request.
-     *
-     * @param  array  $payload
-     * @return array|\Dan\Shopify\Models\AbstractModel
-     *
-     * @throws \Dan\Shopify\Exceptions\InvalidOrMissingEndpointException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
     public function reject($payload = [])
     {
         return $this->client->post($payload, 'fulfillment_request/reject');
     }
 
-    /**
-     * Release the fulfillment hold on a fulfillment order.
-     *
-     * @return array|\Dan\Shopify\Models\AbstractModel
-     *
-     * @throws \Dan\Shopify\Exceptions\InvalidOrMissingEndpointException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
     public function release_hold()
     {
         return $this->client->post([], 'release_hold');
     }
 
-    /**
-     * Updates the fulfill_at time of a scheduled fulfillment order.
-     *
-     * @param  array  $payload
-     * @return array|\Dan\Shopify\Models\AbstractModel
-     *
-     * @throws \Dan\Shopify\Exceptions\InvalidOrMissingEndpointException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
     public function reschedule($payload = [])
     {
         return $this->client->post($payload, 'reschedule');
