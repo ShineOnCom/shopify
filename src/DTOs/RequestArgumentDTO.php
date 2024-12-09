@@ -32,6 +32,12 @@ final class RequestArgumentDTO
 
     public function findResourceIdInQueue(string $resource)
     {
-        return '6181861654832';
+        foreach ($this->queue as $row) {
+            if ($row[0] === $resource) {
+                return $row[1];
+            }
+        }
+
+        throw new InvalidGraphQLCallException(sprintf('Resource ID for %s not found. Please call ->%s({id}) in your chain.', $resource, $resource));
     }
 }

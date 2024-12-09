@@ -20,7 +20,7 @@ class FulfillmentOrders extends Endpoint
             return $this->getMutation($dto->payload);
         }
 
-        return $this->getQuery($dto->findResourceIdInQueue('order'));
+        return $this->getQuery($dto->findResourceIdInQueue('orders'));
     }
 
     private function getFields()
