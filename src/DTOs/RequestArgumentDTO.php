@@ -27,6 +27,17 @@ final class RequestArgumentDTO
             return $this->arguments[0];
         }
 
-        throw new InvalidGraphQLCallException();
+        throw new InvalidGraphQLCallException('Resource ID not present');
+    }
+
+    public function findResourceIdInQueue(string $resource)
+    {
+        foreach ($this->queue as $row) {
+            if ($row[0] === $resource) {
+                return $row[1];
+            }
+        }
+
+        throw new InvalidGraphQLCallException(sprintf('Resource ID for %s not found. Please call ->%s({id}) in your chain.', $resource, $resource));
     }
 }
