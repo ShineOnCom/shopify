@@ -77,6 +77,7 @@ class FulfillmentOrders extends Endpoint
                                             'id',
                                             'variant' => [
                                                 'id',
+                                                'title',
                                             ],
                                         ],
                                         'inventoryItemId',

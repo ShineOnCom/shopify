@@ -2,10 +2,11 @@
 
 namespace Dan\Shopify;
 
-use App\Utils\Str;
 use Dan\Shopify\Models\AbstractModel;
 use GuzzleHttp\Client;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 /**
  * Class Util.
@@ -270,10 +271,11 @@ class Util
 
     /**
      * @return bool
+     *              This Package should now ALWAYS be used within Laravel
      */
     public static function isLaravel()
     {
-        return defined('LARAVEL_START') && ! static::isLumen();
+        return true;
     }
 
     /**
@@ -304,5 +306,29 @@ class Util
     public static function toGraphQLIdParam(?string $id, string $resource): string
     {
         return sprintf('id: "%s"', Util::toGid($id, $resource));
+    }
+
+    public static function convertKeysToSnakeCase(array|Collection $collection): array
+    {
+        if (! $collection instanceof Collection) {
+            $collection = collect($collection);
+        }
+
+        return $collection->mapWithKeys(function ($value, $key) {
+            $snakeKey = Str::snake($key);
+            if (is_array($value) || $value instanceof Collection) {
+                if (filled($value['edges'])) {
+                    $value = array_map(fn ($value) => $value['node'], $value['edges']);
+                }
+
+                $value = static::convertKeysToSnakeCase(collect($value));
+            }
+
+            if (is_string($value) && Str::startsWith($value, 'gid://')) {
+                $value = static::getIdFromGid($value);
+            }
+
+            return [$snakeKey => $value];
+        })->toArray();
     }
 }
