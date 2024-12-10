@@ -19,13 +19,13 @@ class Fulfillments extends Endpoint
     public function makeGraphQLQuery(RequestArgumentDTO $dto): array
     {
         if ($dto->mutate) {
-            return $this->getFulfillmentMutation($dto->payload);
+            return $this->getMutation($dto->payload);
         }
 
-        return $this->getFulfillmentQuery($dto->getResourceId());
+        return $this->getQuery($dto->getResourceId());
     }
 
-    private function getFulfillmentFields()
+    private function getFields()
     {
         return [
             'id',
@@ -70,30 +70,28 @@ class Fulfillments extends Endpoint
         ];
     }
 
-    private function getFulfillmentQuery($fulfillmentId)
+    private function getQuery($fulfillmentId)
     {
         $query = [
-            'fulfillment($FULFILLMENT_ID)' => $this->getFulfillmentFields(),
+            'fulfillment($FULFILLMENT_ID)' => $this->getFields(),
         ];
-
-        $gid = Util::toGid($fulfillmentId, 'Fulfillment');
 
         return [
             'query' => ArrayGraphQL::convert($query, [
-                '$FULFILLMENT_ID' => sprintf('id: "%s"', $gid),
+                '$FULFILLMENT_ID' => Util::toGraphQLIdParam($fulfillmentId, 'Fulfillment'),
                 '$FULFILLMENT_LINE_ITEMS_PER_PAGE' => 'first: 250',
             ]),
             'variables' => null,
         ];
     }
 
-    private function getFulfillmentMutation($payload): array
+    private function getMutation($payload): array
     {
         $fulfillment = $payload['fulfillment'];
 
         $query = [
             'fulfillmentCreateV2($INPUT)' => [
-                'fulfillment' => $this->getFulfillmentFields(),
+                'fulfillment' => $this->getFields(),
                 'userErrors' => [
                     'field',
                     'message',
