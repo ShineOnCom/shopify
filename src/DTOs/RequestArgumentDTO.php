@@ -3,6 +3,7 @@
 namespace Dan\Shopify\DTOs;
 
 use Dan\Shopify\Exceptions\InvalidGraphQLCallException;
+use Dan\Shopify\Util;
 
 final class RequestArgumentDTO
 {
@@ -11,7 +12,17 @@ final class RequestArgumentDTO
 
     }
 
-    public function getResourceId()
+    public function getResourceId(?string $graphQLResourceName = null)
+    {
+        $resourceId = $this->findResourceId();
+        if ($resourceId && $graphQLResourceName) {
+            return Util::toGid($resourceId, $graphQLResourceName);
+        }
+
+        return $resourceId;
+    }
+
+    private function findResourceId()
     {
         if ($this->payload) {
             if (is_string($this->payload)) {
