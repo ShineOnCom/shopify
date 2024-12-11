@@ -5,6 +5,7 @@ namespace Dan\Shopify\Helpers;
 use Dan\Shopify\ArrayGraphQL;
 use Dan\Shopify\Exceptions\InvalidGraphQLCallException;
 use Dan\Shopify\Util;
+use Illuminate\Support\Arr;
 
 class FulfillmentOrders extends Endpoint
 {
@@ -127,7 +128,44 @@ class FulfillmentOrders extends Endpoint
 
     private function getMutation(): array
     {
-        throw new InvalidGraphQLCallException('WIP');
+        if ($this->dto->hasResourceInQueue('fulfillment_request')) {
+            return $this->getFulfillmentRequestMutation();
+        }
+
+        throw new InvalidGraphQLCallException('Mutation for Fulfillment Order not implemented');
+    }
+
+    private function getFulfillmentRequestMutation(): array
+    {
+        $query = [
+            'fulfillmentOrderSubmitFulfillmentRequest($INPUT)' => [
+                'submittedFulfillmentOrder' => [
+                    'id',
+                    'status',
+                ],
+                'userErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        $variables = [
+            'id' => $this->dto->getResourceId('FulfillmentOrder'),
+            'message' => Arr::get($this->dto->payload, 'message', 'Fulfillment Request'),
+            'notifyCustomer' => true,
+        ];
+
+        $query = ArrayGraphQL::convert(
+            $query,
+            ['$INPUT' => 'id: $id, message: $message, notifyCustomer: $notifyCustomer'],
+            'mutation fulfillmentOrderSubmitFulfillmentRequest($id: ID!, $message: String, $notifyCustomer: Boolean)'
+        );
+
+        return [
+            'query' => $query,
+            'variables' => $variables,
+        ];
     }
 
     public function accept($payload = [])

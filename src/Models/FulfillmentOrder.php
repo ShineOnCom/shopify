@@ -16,6 +16,11 @@ class FulfillmentOrder extends AbstractModel
     public function transformGraphQLResponse(array $response): array
     {
         $response = Util::convertKeysToSnakeCase($response);
+        $fulfillment_orders = Arr::get($response, 'data.order.fulfillment_orders');
+        $fulfillment_order_submit_fulfillment_request = Arr::get($response, 'data.fulfillment_order_submit_fulfillment_request');
+        if ($fulfillment_order_submit_fulfillment_request) {
+            return $fulfillment_order_submit_fulfillment_request;
+        }
 
         $fulfillmentOrderId = $response['id'];
         $orderId = Arr::get($response, 'data.order.id');
@@ -40,6 +45,6 @@ class FulfillmentOrder extends AbstractModel
 
             return $row;
 
-        }, Arr::get($response, 'data.order.fulfillment_orders'));
+        }, $fulfillment_orders);
     }
 }
