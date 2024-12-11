@@ -136,6 +136,14 @@ class FulfillmentOrders extends Endpoint
             return $this->getFulfillmentRequestAcceptMutation();
         }
 
+        if ($this->dto->hasResourceInQueue('fulfillment_request/reject')) {
+            return $this->getFulfillmentRequestRejectMutation();
+        }
+
+        if ($this->dto->hasResourceInQueue('release_hold')) {
+            return $this->getFulfillmentRequestReleaseHoldMutation();
+        }
+
         throw new InvalidGraphQLCallException('Mutation for Fulfillment Order not implemented');
     }
 
@@ -196,6 +204,69 @@ class FulfillmentOrders extends Endpoint
             $query,
             ['$INPUT' => 'id: $id, message: $message'],
             'mutation fulfillmentOrderAcceptFulfillmentRequest($id: ID!, $message: String)'
+        );
+
+        return [
+            'query' => $query,
+            'variables' => $variables,
+        ];
+    }
+
+    private function getFulfillmentRequestRejectMutation(): array
+    {
+        $query = [
+            'fulfillmentOrderRejectFulfillmentRequest($INPUT)' => [
+                'fulfillmentOrder' => [
+                    'id',
+                    'status',
+                ],
+                'userErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        $variables = [
+            'id' => $this->dto->getResourceId('FulfillmentOrder'),
+            'message' => Arr::get($this->dto->payload, 'message', 'Fulfillment Request'),
+        ];
+
+        $query = ArrayGraphQL::convert(
+            $query,
+            ['$INPUT' => 'id: $id, message: $message'],
+            'mutation fulfillmentOrderAcceptFulfillmentRequest($id: ID!, $message: String)'
+        );
+
+        return [
+            'query' => $query,
+            'variables' => $variables,
+        ];
+    }
+
+    private function getFulfillmentRequestReleaseHoldMutation(): array
+    {
+        $query = [
+            'fulfillmentOrderReleaseHold($INPUT)' => [
+                'fulfillmentOrder' => [
+                    'id',
+                    'status',
+                ],
+                'userErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        $variables = [
+            'id' => $this->dto->getResourceId('FulfillmentOrder'),
+        ];
+
+        $query = ArrayGraphQL::convert(
+            $query,
+            ['$INPUT' => 'id: $id'],
+            'mutation fulfillmentOrdersReleaseHold($id: ID!)'
         );
 
         return [
