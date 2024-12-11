@@ -11,6 +11,9 @@ final class RequestArgumentDTO
 
     }
 
+    /**
+     * @throws InvalidGraphQLCallException
+     */
     public function getResourceId()
     {
         if ($this->payload) {
@@ -30,6 +33,9 @@ final class RequestArgumentDTO
         throw new InvalidGraphQLCallException('Resource ID not present');
     }
 
+    /**
+     * @throws InvalidGraphQLCallException
+     */
     public function findResourceIdInQueue(string $resource)
     {
         foreach ($this->queue as $row) {
