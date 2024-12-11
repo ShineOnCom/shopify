@@ -43,6 +43,8 @@ abstract class Endpoint
     /** @var Shopify */
     protected $client;
 
+    protected readonly RequestArgumentDTO $dto;
+
     /**
      * Endpoint constructor.
      */
@@ -112,6 +114,13 @@ abstract class Endpoint
         return false;
     }
 
+    public function setRequestArgumentDTO(RequestArgumentDTO $dto): self
+    {
+        $this->dto = $dto;
+
+        return $this;
+    }
+
     public static function useGraphQL(string $endpoint): bool
     {
         return (int) config(sprintf('shopify.endpoints.%s', $endpoint)) === 1;
@@ -132,7 +141,7 @@ abstract class Endpoint
     /**
      * @return array{query: string, variables: array}
      */
-    public function makeGraphQLQuery(RequestArgumentDTO $dto): array
+    public function makeGraphQLQuery(): array
     {
         throw new GraphQLEnabledWithMissingQueriesException('Please override makeGraphQLQuery in child class');
     }
