@@ -22,103 +22,130 @@ class FulfillmentOrders extends Endpoint
     private function getFields()
     {
         return [
-            'order($ORDER_ID)' => [
+            'id',
+            'createdAt',
+            'updatedAt',
+            'assignedLocation' => [
+                'name',
+                'address1',
+                'address2',
+                'city',
+                'countryCode',
+                'phone',
+                'province',
+                'zip',
+            ],
+            'requestStatus',
+            'status',
+            'fulfillAt',
+            'supportedActions' => [
+                'action',
+            ],
+            'destination' => [
                 'id',
-                'fulfillmentOrders($PER_PAGE)' => [
-                    'edges' => [
-                        'node' => [
+                'address1',
+                'address2',
+                'city',
+                'company',
+                'countryCode',
+                'email',
+                'firstName',
+                'lastName',
+                'phone',
+                'province',
+                'zip',
+            ],
+            'internationalDuties' => [
+                'incoterm',
+            ],
+            'lineItems($PER_PAGE)' => [
+                'edges' => [
+                    'node' => [
+                        'id',
+                        'totalQuantity',
+                        'remainingQuantity',
+                        'lineItem' => [
                             'id',
-                            'createdAt',
-                            'updatedAt',
-                            'assignedLocation' => [
-                                'name',
-                                'address1',
-                                'address2',
-                                'city',
-                                'countryCode',
-                                'phone',
-                                'province',
-                                'zip',
-                            ],
-                            'requestStatus',
-                            'status',
-                            'fulfillAt',
-                            'supportedActions' => [
-                                'action',
-                            ],
-                            'destination' => [
+                            'variant' => [
                                 'id',
-                                'address1',
-                                'address2',
-                                'city',
-                                'company',
-                                'countryCode',
-                                'email',
-                                'firstName',
-                                'lastName',
-                                'phone',
-                                'province',
-                                'zip',
-                            ],
-                            'internationalDuties' => [
-                                'incoterm',
-                            ],
-                            'lineItems($PER_PAGE)' => [
-                                'edges' => [
-                                    'node' => [
-                                        'id',
-                                        'totalQuantity',
-                                        'remainingQuantity',
-                                        'lineItem' => [
-                                            'id',
-                                            'variant' => [
-                                                'id',
-                                                'title',
-                                            ],
-                                        ],
-                                        'inventoryItemId',
-                                    ],
-                                ],
-                            ],
-                            'fulfillmentHolds' => [
-                                'reason',
-                                'reasonNotes',
-                                'displayReason',
-                                'heldBy',
-                                'heldByRequestingApp',
-                            ],
-                            'fulfillBy',
-                            'deliveryMethod' => [
-                                'id',
-                                'methodType',
-                                'minDeliveryDateTime',
-                                'maxDeliveryDateTime',
-                            ],
-                            'merchantRequests($PER_PAGE)' => [
-                                'edges' => [
-                                    'node' => [
-                                        'id',
-                                        'kind',
-                                        'message',
-                                        'requestOptions',
-                                        'responseData',
-                                        'sentAt',
-                                    ],
-                                ],
+                                'title',
                             ],
                         ],
+                        'inventoryItemId',
+                    ],
+                ],
+            ],
+            'fulfillmentHolds' => [
+                'reason',
+                'reasonNotes',
+                'displayReason',
+                'heldBy',
+                'heldByRequestingApp',
+            ],
+            'fulfillBy',
+            'deliveryMethod' => [
+                'id',
+                'methodType',
+                'minDeliveryDateTime',
+                'maxDeliveryDateTime',
+            ],
+            'merchantRequests($PER_PAGE)' => [
+                'edges' => [
+                    'node' => [
+                        'id',
+                        'kind',
+                        'message',
+                        'requestOptions',
+                        'responseData',
+                        'sentAt',
                     ],
                 ],
             ],
         ];
     }
 
+    private function getOrderFields()
+    {
+        return [
+            'order($ORDER_ID)' => [
+                'id',
+                'fulfillmentOrders($PER_PAGE)' => [
+                    'edges' => [
+                        'node' => $this->getFields(),
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    private function getFulfillmentOrderFields()
+    {
+        return [
+            'fulfillmentOrder($ID)' => $this->getFields(),
+        ];
+    }
+
     private function getQuery()
+    {
+        if ($this->dto->hasResourceInQueue('orders')) {
+            return $this->getOrderQuery();
+        }
+
+        return [
+            'query' => ArrayGraphQL::convert($this->getFulfillmentOrderFields(), [
+                '$ID' => Util::toGraphQLIdParam($this->dto->getResourceId(), 'FulfillmentOrder'),
+                '$PER_PAGE' => 'first: 100',
+            ]),
+            'variables' => null,
+        ];
+    }
+
+    private function getOrderQuery()
     {
         $orderId = $this->dto->findResourceIdInQueue('orders');
 
         return [
-            'query' => ArrayGraphQL::convert($this->getFields(), [
+            'query' => ArrayGraphQL::convert($this->getOrderFields(), [
                 '$ORDER_ID' => Util::toGraphQLIdParam($orderId, 'Order'),
                 '$PER_PAGE' => 'first: 100',
             ]),
