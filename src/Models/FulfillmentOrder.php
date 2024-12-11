@@ -17,9 +17,8 @@ class FulfillmentOrder extends AbstractModel
     {
         $response = Util::convertKeysToSnakeCase($response);
         $fulfillment_orders = Arr::get($response, 'data.order.fulfillment_orders');
-        $fulfillment_order_submit_fulfillment_request = Arr::get($response, 'data.fulfillment_order_submit_fulfillment_request');
-        if ($fulfillment_order_submit_fulfillment_request) {
-            return $fulfillment_order_submit_fulfillment_request;
+        if (! $fulfillment_orders) {
+            return Arr::get($response, 'data');
         }
 
         $fulfillmentOrderId = $response['id'];

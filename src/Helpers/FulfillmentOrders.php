@@ -132,6 +132,10 @@ class FulfillmentOrders extends Endpoint
             return $this->getFulfillmentRequestMutation();
         }
 
+        if ($this->dto->hasResourceInQueue('fulfillment_request/accept')) {
+            return $this->getFulfillmentRequestAcceptMutation();
+        }
+
         throw new InvalidGraphQLCallException('Mutation for Fulfillment Order not implemented');
     }
 
@@ -160,6 +164,38 @@ class FulfillmentOrders extends Endpoint
             $query,
             ['$INPUT' => 'id: $id, message: $message, notifyCustomer: $notifyCustomer'],
             'mutation fulfillmentOrderSubmitFulfillmentRequest($id: ID!, $message: String, $notifyCustomer: Boolean)'
+        );
+
+        return [
+            'query' => $query,
+            'variables' => $variables,
+        ];
+    }
+
+    private function getFulfillmentRequestAcceptMutation(): array
+    {
+        $query = [
+            'fulfillmentOrderAcceptFulfillmentRequest($INPUT)' => [
+                'fulfillmentOrder' => [
+                    'id',
+                    'status',
+                ],
+                'userErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        $variables = [
+            'id' => $this->dto->getResourceId('FulfillmentOrder'),
+            'message' => Arr::get($this->dto->payload, 'message', 'Fulfillment Request'),
+        ];
+
+        $query = ArrayGraphQL::convert(
+            $query,
+            ['$INPUT' => 'id: $id, message: $message'],
+            'mutation fulfillmentOrderAcceptFulfillmentRequest($id: ID!, $message: String)'
         );
 
         return [
