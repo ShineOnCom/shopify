@@ -3,7 +3,6 @@
 namespace Dan\Shopify\Helpers;
 
 use Dan\Shopify\ArrayGraphQL;
-use Dan\Shopify\DTOs\RequestArgumentDTO;
 use Dan\Shopify\Util;
 
 /**
@@ -16,13 +15,9 @@ class Fulfillments extends Endpoint
         return parent::useGraphQL('fulfillments');
     }
 
-    public function makeGraphQLQuery(RequestArgumentDTO $dto): array
+    public function makeGraphQLQuery(): array
     {
-        if ($dto->mutate) {
-            return $this->getMutation($dto->payload);
-        }
-
-        return $this->getQuery($dto->getResourceId());
+        return $this->dto->mutate ? $this->getMutation() : $this->getQuery();
     }
 
     private function getFields()
@@ -70,8 +65,10 @@ class Fulfillments extends Endpoint
         ];
     }
 
-    private function getQuery($fulfillmentId)
+    private function getQuery()
     {
+        $fulfillmentId = $this->dto->getResourceId();
+
         $query = [
             'fulfillment($FULFILLMENT_ID)' => $this->getFields(),
         ];
@@ -85,8 +82,9 @@ class Fulfillments extends Endpoint
         ];
     }
 
-    private function getMutation($payload): array
+    private function getMutation(): array
     {
+        $payload = $this->dto->payload;
         $fulfillment = $payload['fulfillment'];
 
         $query = [

@@ -3,7 +3,6 @@
 namespace Dan\Shopify\Helpers;
 
 use Dan\Shopify\ArrayGraphQL;
-use Dan\Shopify\DTOs\RequestArgumentDTO;
 use Dan\Shopify\Exceptions\InvalidGraphQLCallException;
 use Dan\Shopify\Util;
 
@@ -14,13 +13,9 @@ class FulfillmentOrders extends Endpoint
         return parent::useGraphQL('fulfillment_orders');
     }
 
-    public function makeGraphQLQuery(RequestArgumentDTO $dto): array
+    public function makeGraphQLQuery(): array
     {
-        if ($dto->mutate) {
-            return $this->getMutation($dto->payload);
-        }
-
-        return $this->getQuery($dto->findResourceIdInQueue('orders'));
+        return $this->dto->mutate ? $this->getMutation() : $this->getQuery();
     }
 
     private function getFields()
@@ -117,8 +112,10 @@ class FulfillmentOrders extends Endpoint
         ];
     }
 
-    private function getQuery($orderId = 0)
+    private function getQuery()
     {
+        $orderId = $this->dto->findResourceIdInQueue('orders');
+
         return [
             'query' => ArrayGraphQL::convert($this->getFields(), [
                 '$ORDER_ID' => Util::toGraphQLIdParam($orderId, 'Order'),
@@ -128,7 +125,7 @@ class FulfillmentOrders extends Endpoint
         ];
     }
 
-    private function getMutation($payload): array
+    private function getMutation(): array
     {
         throw new InvalidGraphQLCallException('WIP');
     }

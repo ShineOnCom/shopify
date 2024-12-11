@@ -358,9 +358,8 @@ class Shopify
     private function withGraphQL($payload = null, bool $mutate = false): array
     {
         if ($this->graphQLEnabled()) {
-            $queryAndVariables = $this->{$this->api}->makeGraphQLQuery(
-                new RequestArgumentDTO($mutate, $payload, $this->queue, $this->ids)
-            );
+            $dto = new RequestArgumentDTO($mutate, $payload, $this->queue, $this->ids);
+            $queryAndVariables = $this->{$this->api}->setRequestArgumentDTO($dto)->makeGraphQLQuery();
 
             return (new static::$resource_models[$this->api]())
                 ->transformGraphQLResponse($this->graphql($queryAndVariables['query'], $queryAndVariables['variables']));
@@ -518,6 +517,10 @@ class Shopify
     {
         $payload = $this->normalizePayload($payload);
         if ($this->graphQLEnabled()) {
+            if (filled($append)) {
+                $this->queue[] = [$append, null];
+            }
+
             return $this->withGraphQL($payload, true);
         }
 
