@@ -59,20 +59,6 @@ class Images extends Endpoint
                 'edges' => [
                     'node' => [
                         'id',
-                        'availableForSale',
-                        'barcode',
-                        'compareAtPrice',
-                        'createdAt',
-                        'updatedAt',
-                        'defaultCursor',
-                        'displayName',
-                        'position',
-                        'price',
-                        'sellableOnlineQuantity',
-                        'sku',
-                        'taxCode',
-                        'taxable',
-                        'title',
                         'image' => [
                             'id',
                             'url',
