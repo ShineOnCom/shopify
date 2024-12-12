@@ -50,7 +50,7 @@ class Image extends AbstractModel
         foreach ($flattenedResponse as $product) {
             foreach ($product['images'] as $key => $image) {
                 $images[] = [
-                    'id' => (int) Util::getIdFromGid($image['id']),
+                    'id' => (int) $image['id'],
                     'alt' => $image['alt_text'] ?: null,
                     'position' => $key + 1,
                     'product_id' => (int) $product['id'],
@@ -65,7 +65,7 @@ class Image extends AbstractModel
 
                 foreach ($product['variants'] as $variant) {
                     if ($variant['image'] && $variant['image']['id'] === $image['id']) {
-                        $images[$key]['variant_ids'][] = (int) Util::getIdFromGid($variant['id']);
+                        $images[$key]['variant_ids'][] = (int) $variant['id'];
                     }
                 }
             }
