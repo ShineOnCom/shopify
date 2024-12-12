@@ -321,6 +321,10 @@ class Util
                     $value = array_map(fn ($value) => $value['node'], $value['edges']);
                 }
 
+                if (isset($value['nodes']) && filled($value['nodes'])) {
+                    $value = $value['nodes'];
+                }
+
                 $value = static::convertKeysToSnakeCase(collect($value));
             }
 
