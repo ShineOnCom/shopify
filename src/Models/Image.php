@@ -43,44 +43,33 @@ class Image extends AbstractModel
 
     public function transformGraphQLResponse(array $response)
     {
-        // Welcome to loop town!
+        $flattenedResponse = Util::convertKeysToSnakeCase($response['data']);
 
-        $response = $response['data'];
         $images = [];
 
-        foreach ($response as $value) {
-            $productId = Util::getIdFromGid($value['id']);
-
-            foreach ($value['images']['nodes'] as $key => $media) {
+        foreach ($flattenedResponse as $product) {
+            foreach ($product['images'] as $key => $image) {
                 $images[] = [
-                    'id' => (int) Util::getIdFromGid($media['id']),
-                    'alt' => $media['altText'] ?: null,
+                    'id' => (int) Util::getIdFromGid($image['id']),
+                    'alt' => $image['alt_text'] ?: null,
                     'position' => $key + 1,
-                    'product_id' => (int) $productId,
+                    'product_id' => (int) $product['id'],
                     'created_at' => null,
                     'updated_at' => null,
-                    'admin_graphql_api_id' => $media['id'],
-                    'width' => $media['width'],
-                    'height' => $media['height'],
-                    'src' => $media['url'],
+                    'admin_graphql_api_id' => 'gid://shopify/ProductImage/'.$image['id'],
+                    'width' => $image['width'],
+                    'height' => $image['height'],
+                    'src' => $image['url'],
                     'variant_ids' => [],
                 ];
 
-                foreach ($value['variants']['edges'] as $variant) {
-                    foreach ($images as $key => $productImage) {
-                        $variantAlreadyAdded = in_array(Util::getIdFromGid($variant['node']['id']), $productImage['variant_ids']);
-                        $variantHasProductImage = $variant['node']['image']['id'] === $productImage['admin_graphql_api_id'];
-
-                        if ($variantHasProductImage && ! $variantAlreadyAdded) {
-                            $images[$key]['variant_ids'][] = (int) Util::getIdFromGid($variant['node']['id']);
-                        }
+                foreach ($product['variants'] as $variant) {
+                    if ($variant['image'] && $variant['image']['id'] === $image['id']) {
+                        $images[$key]['variant_ids'][] = (int) Util::getIdFromGid($variant['id']);
                     }
                 }
             }
-
         }
-
-        dd($images);
 
         return $images;
     }
