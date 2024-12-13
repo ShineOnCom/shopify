@@ -43,7 +43,6 @@ class Images extends Endpoint
 
     private function getFields(): array
     {
-
         return [
             'id',
             'images($COUNT)' => [
