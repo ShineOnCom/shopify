@@ -19,11 +19,11 @@ class FulfillmentOrder extends AbstractModel
         $data = Arr::get($response, 'data');
         $fulfillment_orders = Arr::get($data, 'order.fulfillment_orders');
         if (! $fulfillment_orders) {
-            $first_key = array_key_first($data);
+            $fulfillment_order_key = sprintf('%s.fulfillment_order', array_key_first($data));
 
             return $this->transformFulfillmentOrder(
-                Arr::get($data, $first_key),
-                Arr::get($data, sprintf('%s.id', $first_key))
+                Arr::get($data, $fulfillment_order_key),
+                Arr::get($data, sprintf('%s.id', $fulfillment_order_key))
             );
         }
 

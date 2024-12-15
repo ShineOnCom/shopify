@@ -370,7 +370,10 @@ class Shopify
                 throw new GraphQLRequestException($message);
             }
 
-            return (new static::$resource_models[$this->api]())->transformGraphQLResponse($response);
+            $response = (new static::$resource_models[$this->api]())->transformGraphQLResponse($response);
+            static::log('log_api_transformed_response_data', $response);
+
+            return $response;
         }
 
         throw new GraphQLEnabledWithMissingQueriesException();
@@ -1040,6 +1043,7 @@ class Shopify
             $message = match ($type) {
                 'log_api_request_data' => 'vendor:dan:shopify:api:request',
                 'log_api_response_data' => 'vendor:dan:shopify:api:response',
+                'log_api_transformed_response_data' => 'vendor:dan:shopify:api:response:transformed',
                 'log_deprecation_warnings' => 'vendor:dan:shopify:api:deprecated',
                 default => 'vendor:dan:shopify'
             };
