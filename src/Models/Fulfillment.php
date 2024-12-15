@@ -2,6 +2,7 @@
 
 namespace Dan\Shopify\Models;
 
+use Dan\Shopify\Util;
 use Illuminate\Support\Arr;
 
 /**
@@ -64,7 +65,7 @@ class Fulfillment extends AbstractModel
      */
     public function transformGraphQLResponse(array $response): ?array
     {
-        $response = parent::transformGraphQLResponse($response);
+        $response = Util::convertKeysToSnakeCase($response);
 
         return Arr::get($response, 'data.fulfillment_create_v2.fulfillment', Arr::get($response, 'data.fulfillment'));
     }
