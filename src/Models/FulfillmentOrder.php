@@ -35,8 +35,6 @@ class FulfillmentOrder extends AbstractModel
 
     private function transformFulfillmentOrder(?array $row = null, ?string $fulfillmentOrderId = null, ?string $orderId = null)
     {
-        \Log::info('shopify:transform', $row);
-
         if (! $row) {
             return $row;
         }
