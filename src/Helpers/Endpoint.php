@@ -141,7 +141,7 @@ abstract class Endpoint
     /**
      * @return array{query: string, variables: array}
      */
-    public function makeGraphQLQuery(): array
+    public function makeGraphQLQuery(): ?array
     {
         throw new GraphQLEnabledWithMissingQueriesException('Please override makeGraphQLQuery in child class');
     }

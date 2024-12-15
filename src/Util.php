@@ -308,6 +308,25 @@ class Util
         return sprintf('id: "%s"', Util::toGid($id, $resource));
     }
 
+    public static function getGraphQLError(array $response)
+    {
+        if (Arr::get($response, 'errors')) {
+            return Arr::get($response, 'errors.0.message');
+        }
+
+        $data = Arr::get($response, 'data');
+        if (! $data) {
+            return null;
+        }
+
+        $first_key = array_key_first($data);
+        if (! $first_key) {
+            return null;
+        }
+
+        return Arr::get($response, sprintf('data.%s.userErrors.0.message', $first_key));
+    }
+
     public static function convertKeysToSnakeCase(array|Collection $collection): array
     {
         if (! $collection instanceof Collection) {
@@ -317,8 +336,12 @@ class Util
         return $collection->mapWithKeys(function ($value, $key) {
             $snakeKey = Str::snake($key);
             if (is_array($value) || $value instanceof Collection) {
-                if (filled($value['edges'])) {
+                if (isset($value['edges']) && filled($value['edges'])) {
                     $value = array_map(fn ($value) => $value['node'], $value['edges']);
+                }
+
+                if (isset($value['nodes']) && filled($value['nodes'])) {
+                    $value = $value['nodes'];
                 }
 
                 $value = static::convertKeysToSnakeCase(collect($value));
