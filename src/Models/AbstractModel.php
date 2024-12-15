@@ -723,9 +723,9 @@ abstract class AbstractModel implements ArrayAccess, JsonSerializable
     }
 
     /**
-     * @return array
+     * @return ?array
      */
-    public function transformGraphQLResponse(array $response)
+    public function transformGraphQLResponse(array $response): ?array
     {
         return $response;
     }
