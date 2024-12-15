@@ -178,10 +178,7 @@ class FulfillmentOrders extends Endpoint
     {
         $query = [
             'fulfillmentOrderSubmitFulfillmentRequest($INPUT)' => [
-                'submittedFulfillmentOrder' => [
-                    'id',
-                    'status',
-                ],
+                'submittedFulfillmentOrder' => $this->getFields(),
                 'userErrors' => [
                     'field',
                     'message',
@@ -197,7 +194,7 @@ class FulfillmentOrders extends Endpoint
 
         $query = ArrayGraphQL::convert(
             $query,
-            ['$INPUT' => 'id: $id, message: $message, notifyCustomer: $notifyCustomer'],
+            ['$INPUT' => 'id: $id, message: $message, notifyCustomer: $notifyCustomer', '$PER_PAGE' => 'first: 100'],
             'mutation fulfillmentOrderSubmitFulfillmentRequest($id: ID!, $message: String, $notifyCustomer: Boolean)'
         );
 
@@ -211,10 +208,7 @@ class FulfillmentOrders extends Endpoint
     {
         $query = [
             'fulfillmentOrderAcceptFulfillmentRequest($INPUT)' => [
-                'fulfillmentOrder' => [
-                    'id',
-                    'status',
-                ],
+                'fulfillmentOrder' => $this->getFields(),
                 'userErrors' => [
                     'field',
                     'message',
@@ -229,7 +223,7 @@ class FulfillmentOrders extends Endpoint
 
         $query = ArrayGraphQL::convert(
             $query,
-            ['$INPUT' => 'id: $id, message: $message'],
+            ['$INPUT' => 'id: $id, message: $message', '$PER_PAGE' => 'first: 100'],
             'mutation fulfillmentOrderAcceptFulfillmentRequest($id: ID!, $message: String)'
         );
 
@@ -243,10 +237,7 @@ class FulfillmentOrders extends Endpoint
     {
         $query = [
             'fulfillmentOrderRejectFulfillmentRequest($INPUT)' => [
-                'fulfillmentOrder' => [
-                    'id',
-                    'status',
-                ],
+                'fulfillmentOrder' => $this->getFields(),
                 'userErrors' => [
                     'field',
                     'message',
@@ -261,7 +252,7 @@ class FulfillmentOrders extends Endpoint
 
         $query = ArrayGraphQL::convert(
             $query,
-            ['$INPUT' => 'id: $id, message: $message'],
+            ['$INPUT' => 'id: $id, message: $message', '$PER_PAGE' => 'first: 100'],
             'mutation fulfillmentOrderAcceptFulfillmentRequest($id: ID!, $message: String)'
         );
 
@@ -275,10 +266,7 @@ class FulfillmentOrders extends Endpoint
     {
         $query = [
             'fulfillmentOrderReleaseHold($INPUT)' => [
-                'fulfillmentOrder' => [
-                    'id',
-                    'status',
-                ],
+                'fulfillmentOrder' => $this->getFields(),
                 'userErrors' => [
                     'field',
                     'message',
@@ -292,7 +280,7 @@ class FulfillmentOrders extends Endpoint
 
         $query = ArrayGraphQL::convert(
             $query,
-            ['$INPUT' => 'id: $id'],
+            ['$INPUT' => 'id: $id', '$PER_PAGE' => 'first: 100'],
             'mutation fulfillmentOrdersReleaseHold($id: ID!)'
         );
 

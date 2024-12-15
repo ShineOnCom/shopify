@@ -5,6 +5,7 @@ namespace Dan\Shopify;
 use BadMethodCallException;
 use Dan\Shopify\DTOs\RequestArgumentDTO;
 use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
+use Dan\Shopify\Exceptions\GraphQLRequestException;
 use Dan\Shopify\Exceptions\InvalidOrMissingEndpointException;
 use Dan\Shopify\Exceptions\ModelNotFoundException;
 use Dan\Shopify\Helpers\Endpoint;
@@ -355,14 +356,21 @@ class Shopify
     /**
      * @throws GraphQLEnabledWithMissingQueriesException
      */
-    private function withGraphQL($payload = null, bool $mutate = false): array
+    private function withGraphQL($payload = null, bool $mutate = false): ?array
     {
         if ($this->graphQLEnabled()) {
             $dto = new RequestArgumentDTO($mutate, $payload, $this->queue, $this->ids);
             $queryAndVariables = $this->{$this->api}->setRequestArgumentDTO($dto)->makeGraphQLQuery();
 
-            return (new static::$resource_models[$this->api]())
-                ->transformGraphQLResponse($this->graphql($queryAndVariables['query'], $queryAndVariables['variables']));
+            $response = $this->graphql($queryAndVariables['query'], $queryAndVariables['variables']);
+            if ($error = Util::getGraphQLError($response)) {
+                // This is the format that the REST API returns when there is User Error. Just following the same.
+                // Although the exception class is different. But this shouldn't matter.
+                $message = sprintf("HTTP request returned status code 422:\n%s", json_encode(['errors' => [$error]]));
+                throw new GraphQLRequestException($message);
+            }
+
+            return (new static::$resource_models[$this->api]())->transformGraphQLResponse($response);
         }
 
         throw new GraphQLEnabledWithMissingQueriesException();
