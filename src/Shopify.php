@@ -35,7 +35,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Log;
 use Psr\Http\Message\MessageInterface;
-use Throwable;
+use ReflectionClass;
 
 /**
  * Class Shopify.
@@ -359,12 +359,15 @@ class Shopify
         }
 
         if (in_array($this->shop, config('shopify.graphql-pilot-stores'))) {
-            try {
-                $this->{$this->api}->makeGraphQLQuery();
+            $className = $this->{$this->api}::class;
+            $method = (new ReflectionClass($className))->getMethod('makeGraphQLQuery');
+
+            // GraphQL is only supported if the method has been overridden.
+            if ($method->getDeclaringClass()->getName() === $className) {
                 Log::warning("vendor:dan:shopify:graphql:pilot:supported:{$this->shop}", ['api' => $this->api]);
 
                 return true;
-            } catch (Throwable $th) {
+            } else {
                 Log::warning("vendor:dan:shopify:graphql:pilot:not-supported:{$this->shop}", ['api' => $this->api]);
 
                 return false;
