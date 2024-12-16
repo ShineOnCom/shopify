@@ -136,4 +136,6 @@ return [
         'variants' => (int) env('SHOPIFY_ENDPOINT_VARIANTS_USE_GRAPHQL', 0),
         'webhooks' => (int) env('SHOPIFY_ENDPOINT_WEBHOOKS_USE_GRAPHQL', 0),
     ],
+
+    'graphql-pilot-stores' => explode(',', env('SHOPIFY_GRAPHQL_PILOT_STORES', '')) ?: [],
 ];
