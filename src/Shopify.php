@@ -33,6 +33,7 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
+use Log;
 use Psr\Http\Message\MessageInterface;
 
 /**
@@ -274,6 +275,8 @@ class Shopify
      */
     protected $client;
 
+    protected readonly string $shop;
+
     /**
      * Shopify constructor.
      *
@@ -283,8 +286,8 @@ class Shopify
      */
     public function __construct($shop, $token, $base = null)
     {
-        $shop = Util::normalizeDomain($shop);
-        $base_uri = "https://{$shop}";
+        $this->shop = Util::normalizeDomain($shop);
+        $base_uri = "https://{$this->shop}";
 
         $this->setBase($base);
 
@@ -350,7 +353,17 @@ class Shopify
 
     private function graphQLEnabled(): bool
     {
-        return $this->api && $this->{$this->api}->graphQLEnabled();
+        if (! $this->api) {
+            return false;
+        }
+
+        if (in_array($this->shop, config('shopify.graphql-pilot-stores'))) {
+            Log::warning('vendor:dan:shopify:api:graphql:pilot', ['shop' => $this->shop, 'api' => $this->api]);
+
+            return true;
+        }
+
+        return $this->{$this->api}->graphQLEnabled();
     }
 
     /**
