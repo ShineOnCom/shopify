@@ -35,6 +35,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Log;
 use Psr\Http\Message\MessageInterface;
+use Throwable;
 
 /**
  * Class Shopify.
@@ -358,9 +359,16 @@ class Shopify
         }
 
         if (in_array($this->shop, config('shopify.graphql-pilot-stores'))) {
-            Log::warning('vendor:dan:shopify:api:graphql:pilot', ['shop' => $this->shop, 'api' => $this->api]);
+            try {
+                $this->{$this->api}->makeGraphQLQuery();
+                Log::warning("vendor:dan:shopify:graphql:pilot:supported:{$this->shop}", ['api' => $this->api]);
 
-            return true;
+                return true;
+            } catch (Throwable $th) {
+                Log::warning("vendor:dan:shopify:graphql:pilot:not-supported:{$this->shop}", ['api' => $this->api]);
+
+                return false;
+            }
         }
 
         return $this->{$this->api}->graphQLEnabled();
