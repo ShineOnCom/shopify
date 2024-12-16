@@ -13,29 +13,40 @@ class FulfillmentOrder extends AbstractModel
     /** @var string */
     public static $resource_name_many = 'fulfillment_orders';
 
-    public function transformGraphQLResponse(array $response): array
+    public function transformGraphQLResponse(array $response): ?array
     {
         $response = Util::convertKeysToSnakeCase($response);
-        $fulfillment_orders = Arr::get($response, 'data.order.fulfillment_orders');
-        if ($fulfillment_order = Arr::get($response, 'data.fulfillment_order')) {
-            return $this->transformFulfillmentOrder($fulfillment_order);
-        }
-
+        $data = Arr::get($response, 'data');
+        $fulfillment_orders = Arr::get($data, 'order.fulfillment_orders');
         if (! $fulfillment_orders) {
-            return Arr::get($response, 'data');
+            $fulfillment_order_key = Arr::get($data, 'fulfillment_order')
+                ? 'fulfillment_order'
+                : sprintf('%s.fulfillment_order', array_key_first($data));
+
+            return $this->transformFulfillmentOrder(
+                Arr::get($data, $fulfillment_order_key),
+                Arr::get($data, sprintf('%s.id', $fulfillment_order_key))
+            );
         }
 
-        $fulfillmentOrderId = $response['id'];
-        $orderId = Arr::get($response, 'data.order.id');
+        $orderId = Arr::get($data, 'order.id');
+        $fulfillmentOrderId = Arr::get($data, 'order.fulfillment_orders.0.id');
 
-        return array_map(fn ($row) => $this->transformFulfillmentOrder($row, $orderId, $fulfillmentOrderId), $fulfillment_orders);
+        return array_map(fn ($row) => $this->transformFulfillmentOrder($row, $fulfillmentOrderId, $orderId), $fulfillment_orders);
     }
 
-    private function transformFulfillmentOrder(array $row, ?string $orderId = null, ?string $fulfillmentOrderId = null)
+    private function transformFulfillmentOrder(?array $row = null, ?string $fulfillmentOrderId = null, ?string $orderId = null)
     {
+        if (! $row) {
+            return $row;
+        }
+
         $row['shop_id'] = null;
         $row['order_id'] = $orderId;
         $row['assigned_location_id'] = null;
+        $row['request_status'] = strtolower($row['request_status']);
+        $row['status'] = strtolower($row['status']);
+        $row['supported_actions'] = array_map(fn ($action) => strtolower($action['action']), $row['supported_actions']);
 
         $row['line_items'] = array_map(function ($line_item) use ($fulfillmentOrderId) {
             $line_item = $line_item + [

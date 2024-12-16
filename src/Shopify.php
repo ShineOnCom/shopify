@@ -5,6 +5,7 @@ namespace Dan\Shopify;
 use BadMethodCallException;
 use Dan\Shopify\DTOs\RequestArgumentDTO;
 use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
+use Dan\Shopify\Exceptions\GraphQLRequestException;
 use Dan\Shopify\Exceptions\InvalidOrMissingEndpointException;
 use Dan\Shopify\Exceptions\ModelNotFoundException;
 use Dan\Shopify\Helpers\Endpoint;
@@ -355,14 +356,24 @@ class Shopify
     /**
      * @throws GraphQLEnabledWithMissingQueriesException
      */
-    private function withGraphQL($payload = null, bool $mutate = false): array
+    private function withGraphQL($payload = null, bool $mutate = false): ?array
     {
         if ($this->graphQLEnabled()) {
             $dto = new RequestArgumentDTO($mutate, $payload, $this->queue, $this->ids);
             $queryAndVariables = $this->{$this->api}->setRequestArgumentDTO($dto)->makeGraphQLQuery();
 
-            return (new static::$resource_models[$this->api]())
-                ->transformGraphQLResponse($this->graphql($queryAndVariables['query'], $queryAndVariables['variables']));
+            $response = $this->graphql($queryAndVariables['query'], $queryAndVariables['variables']);
+            if ($error = Util::getGraphQLError($response)) {
+                // This is the format that the REST API returns when there is User Error. Just following the same.
+                // Although the exception class is different. But this shouldn't matter.
+                $message = sprintf("HTTP request returned status code 422:\n%s", json_encode(['errors' => [$error]]));
+                throw new GraphQLRequestException($message);
+            }
+
+            $response = (new static::$resource_models[$this->api]())->transformGraphQLResponse($response);
+            static::log('log_api_response_data', $response);
+
+            return $response;
         }
 
         throw new GraphQLEnabledWithMissingQueriesException();
@@ -1026,7 +1037,7 @@ class Shopify
         return $cursors;
     }
 
-    private static function log(string $type = 'log_api_request_data', array $context = [])
+    private static function log(string $type = 'log_api_request_data', ?array $context = [])
     {
         if (Util::isLaravel() && config(sprintf('shopify.options.%s', $type))) {
             $message = match ($type) {
@@ -1035,6 +1046,8 @@ class Shopify
                 'log_deprecation_warnings' => 'vendor:dan:shopify:api:deprecated',
                 default => 'vendor:dan:shopify'
             };
+
+            $context ??= [];
 
             switch ($message) {
                 case 'log_deprecation_warnings':
