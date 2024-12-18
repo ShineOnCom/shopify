@@ -2,6 +2,10 @@
 
 namespace Dan\Shopify\Models;
 
+use Dan\Shopify\Util;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+
 /**
  * Class FulfillmentService.
  *
@@ -42,4 +46,38 @@ class FulfillmentService extends AbstractModel
         'provider_id' => 'integer',
         'location_id' => 'integer',
     ];
+
+    public function transformGraphQLResponse(array $response): ?array
+    {
+        $response = Util::convertKeysToSnakeCase($response);
+        if ($fulfillment_services = Arr::get($response, 'data.shop.fulfillment_services')) {
+            return collect($fulfillment_services)
+                ->reject(fn ($row) => $row['id'] === 'manual')
+                ->map(fn ($row) => $this->formatFulfillmentService($row))
+                ->values()
+                ->all();
+        }
+
+        return $this->formatFulfillmentService(Arr::get($response, 'data.fulfillment_service'));
+    }
+
+    public function formatFulfillmentService(array $row)
+    {
+        return [
+            'id' => Str::replace('?id=true', '', $row['id']),
+            'name' => $row['service_name'],
+            'email' => null,
+            'service_name' => $row['service_name'],
+            'handle' => $row['handle'],
+            'fulfillment_orders_opt_in' => $row['fulfillment_orders_opt_in'],
+            'include_pending_stock' => null,
+            'provider_id' => null,
+            'location_id' => null,
+            'callback_url' => $row['callback_url'],
+            'tracking_support' => null,
+            'inventory_management' => $row['inventory_management'],
+            'permits_sku_sharing' => $row['permits_sku_sharing'],
+            'requires_shipping_method' => null,
+        ];
+    }
 }
