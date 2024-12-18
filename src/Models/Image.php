@@ -2,6 +2,8 @@
 
 namespace Dan\Shopify\Models;
 
+use Dan\Shopify\Util;
+
 /**
  * Class Image.
  *
@@ -38,4 +40,37 @@ class Image extends AbstractModel
         'src' => 'string',
         'variant_ids' => 'array',
     ];
+
+    public function transformGraphQLResponse(array $response)
+    {
+        $flattenedResponse = Util::convertKeysToSnakeCase($response['data']);
+
+        $images = [];
+
+        foreach ($flattenedResponse as $product) {
+            foreach ($product['images'] as $key => $image) {
+                $images[] = [
+                    'id' => (int) $image['id'],
+                    'alt' => $image['alt_text'] ?: null,
+                    'position' => $key + 1,
+                    'product_id' => (int) $product['id'],
+                    'created_at' => null,
+                    'updated_at' => null,
+                    'admin_graphql_api_id' => 'gid://shopify/ProductImage/'.$image['id'],
+                    'width' => $image['width'],
+                    'height' => $image['height'],
+                    'src' => $image['url'],
+                    'variant_ids' => [],
+                ];
+
+                foreach ($product['variants'] as $variant) {
+                    if ($variant['image'] && $variant['image']['id'] === $image['id']) {
+                        $images[$key]['variant_ids'][] = (int) $variant['id'];
+                    }
+                }
+            }
+        }
+
+        return $images;
+    }
 }
