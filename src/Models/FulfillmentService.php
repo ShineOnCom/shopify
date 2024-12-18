@@ -58,7 +58,11 @@ class FulfillmentService extends AbstractModel
                 ->all();
         }
 
-        return $this->formatFulfillmentService(Arr::get($response, 'data.fulfillment_service'));
+        $fulfillment_service = Arr::get($response, 'data.fulfillment_service_create.fulfillment_service')
+            ?? Arr::get($response, 'data.fulfillment_service_update.fulfillment_service')
+            ?? Arr::get($response, 'data.fulfillment_service', []);
+
+        return $this->formatFulfillmentService($fulfillment_service);
     }
 
     public function formatFulfillmentService(array $row)
