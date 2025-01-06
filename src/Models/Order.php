@@ -2,6 +2,9 @@
 
 namespace Dan\Shopify\Models;
 
+use Dan\Shopify\Util;
+use Illuminate\Support\Arr;
+
 /**
  * Class Order.
  *
@@ -185,4 +188,118 @@ class Order extends AbstractModel
         self::FILTER_STATUS_CLOSED,
         self::FILTER_STATUS_OPEN,
     ];
+
+    public function transformGraphQLResponse(array $response): ?array
+    {
+        $response = Util::convertKeysToSnakeCase($response);
+
+        if ($orders = Arr::get($response, 'data.orders')) {
+            return collect($orders)->map(fn ($row) => $this->formatOrder($row))->values()->all();
+        }
+
+        $order = Arr::get($response, 'data.order', []);
+
+        return $this->formatOrder($order);
+    }
+
+    public function formatOrder(array $row)
+    {
+        $row['id'] = (int) $row['id'];
+        $row['total_weight'] = (int) $row['total_weight'];
+        $row['tags'] = implode(',', $row['tags']);
+
+        $row['billing_address']['id'] = (int) str_replace('?model_name=CustomerAddress', '', $row['billing_address']['id']);
+        $row['billing_address']['country_code'] = $row['billing_address']['country_code_v2'];
+
+        $row['shipping_address']['id'] = (int) str_replace('?model_name=CustomerAddress', '', $row['shipping_address']['id']);
+        $row['shipping_address']['country_code'] = $row['shipping_address']['country_code_v2'];
+        $row['shipping_address']['country_code'] = $row['shipping_address']['country_code_v2'];
+
+        $row['customer']['id'] = (int) $row['customer']['id'];
+        $row['customer']['admin_graphql_api_id'] = Util::toGid($row['customer']['id'], 'Customer');
+        $row['customer']['currency'] = null;
+
+        $row['customer']['default_address']['customer_id'] = $row['customer']['id'];
+        $row['customer']['default_address']['id'] = (int) str_replace('?model_name=CustomerAddress', '', $row['customer']['default_address']['id']);
+        $row['customer']['default_address']['country_code'] = $row['customer']['default_address']['country_code_v2'];
+        $row['customer']['default_address']['country_name'] = $row['customer']['default_address']['country'];
+        $row['customer']['default_address']['default'] = true;
+
+        $row['customer']['email_marketing_consent']['opt_in_level'] = $row['customer']['email_marketing_consent']['marketing_opt_in_level'];
+        $row['customer']['email_marketing_consent']['state'] = $row['customer']['email_marketing_consent']['marketing_state'];
+
+        $row['line_items'] = array_map(function ($line_item) {
+            return [
+                ...$line_item,
+                'admin_graphql_api_id' => Util::toGid($line_item['id'], 'LineItem'),
+                'fulfillable_quantity' => (int) $line_item['quantity'] - (int) $line_item['non_fulfillable_quantity'],
+                'fulfillment_service' => $line_item['fulfillment_service']['handle'],
+                'id' => (int) $line_item['id'],
+                'gift_card' => $line_item['is_gift_card'],
+                'grams' => null,
+                'price' => Arr::get($line_item, 'original_unit_price_set.shop_money.amount'),
+                'price_set' => $line_item['original_unit_price_set'],
+                'product_exists' => isset($line_item['product']),
+                'product_id' => (int) Arr::get($line_item, 'product.id'),
+                'properties' => [],
+                'total_discount' => Arr::get($line_item, 'total_discount_set.shop_money.amount'),
+                'variant_id' => (int) Arr::get($line_item, 'variant.id'),
+                'variant_inventory_management' => null,
+            ];
+        }, $row['line_items']);
+
+        $extra = [
+            'admin_graphql_api_id' => Util::toGid($row['id'], 'Order'),
+            'app_id' => (int) Arr::get($row['app'], 'id'),
+            'browser_ip' => $row['client_ip'],
+            'buyer_accepts_marketing' => $row['customer_accepts_marketing'],
+            'currency' => $row['currency_code'],
+            'cart_token' => null,
+            'checkout_id' => null,
+            'checkout_token' => null,
+            'client_details' => [
+                'accept_language' => null,
+                'browser_height' => null,
+                'browser_width' => null,
+                'browser_ip' => $row['browser_ip'],
+                'session_hash' => null,
+                'user_agent' => null,
+            ],
+            'company' => null,
+            'contact_email' => $row['email'],
+            'current_subtotal_price' => Arr::get($row, 'current_subtotal_price_set.shop_money.amount'),
+            'current_total_additional_fees_set' => Arr::get($row, 'current_total_additional_fees_set.shop_money.amount'),
+            'current_total_discounts' => Arr::get($row, 'current_total_discounts_set.shop_money.amount'),
+            'current_total_price' => Arr::get($row, 'current_total_price_set.shop_money.amount'),
+            'current_total_tax' => Arr::get($row, 'current_total_tax_set.shop_money.amount'),
+            'subtotal_price' => Arr::get($row, 'subtotal_price_set.shop_money.amount'),
+            'total_discounts' => Arr::get($row, 'total_discounts_set.shop_money.amount'),
+            'total_outstanding' => Arr::get($row, 'total_outstanding_set.shop_money.amount'),
+            'total_price' => Arr::get($row, 'total_price_set.shop_money.amount'),
+            'total_tax' => Arr::get($row, 'total_tax_set.shop_money.amount'),
+            'total_tip_received' => Arr::get($row, 'total_tip_received_set.shop_money.amount'),
+            'total_line_items_price' => Arr::get($row, 'subtotal_price_set.shop_money.amount'),
+            'total_line_items_price_set' => $row['subtotal_price_set'],
+            'device_id' => null,
+            'user_id' => null,
+            'landing_site' => null,
+            'landing_site_ref' => null,
+            'financial_status' => $row['display_financial_status'],
+            'fulfillment_status' => $row['display_fulfillment_status'],
+            'location_id' => null,
+            'merchant_of_record_app_id' => null,
+            'note_attributes' => [],
+            'number' => (int) str_replace('#', '', $row['name']),
+            'order_number' => (int) str_replace('#', '', $row['name']),
+            'order_status_url' => $row['status_page_url'],
+            'payment_terms' => null,
+            'presentment_currency' => $row['presentment_currency_code'],
+            'reference' => null,
+            'referring_site' => null,
+            'source_url' => null,
+            'token' => null,
+        ];
+
+        return [...$extra, ...$row];
+    }
 }
