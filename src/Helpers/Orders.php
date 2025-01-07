@@ -295,13 +295,17 @@ class Orders extends Endpoint
         }
 
         $filters = collect([]);
-        if ($ids = $this->dto->payload['ids']) {
+        if ($ids = Arr::get($this->dto->payload, 'ids')) {
             $ids = collect(explode(',', $ids))->map(fn ($id) => sprintf('(id:%s)', $id));
             $filters = $filters->merge($ids);
         }
 
-        if ($name = $this->dto->payload['name']) {
+        if ($name = Arr::get($this->dto->payload, 'name')) {
             $filters = $filters->merge([sprintf("(name:'%s')", $name)]);
+        }
+
+        if ($created_at_min = Arr::get($this->dto->payload, 'created_at_min')) {
+            $filters = $filters->merge([sprintf("(created_at:>='%s')", $created_at_min)]);
         }
 
         return sprintf('query: "%s"', $filters->join(' OR '));

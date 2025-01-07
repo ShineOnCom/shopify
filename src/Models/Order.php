@@ -204,6 +204,10 @@ class Order extends AbstractModel
 
     public function formatOrder(array $row)
     {
+        if (blank($row)) {
+            return [];
+        }
+
         $row['id'] = (int) $row['id'];
         $row['total_weight'] = (int) $row['total_weight'];
         $row['tags'] = implode(',', $row['tags']);
