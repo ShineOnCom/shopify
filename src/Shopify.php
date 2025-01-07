@@ -617,7 +617,7 @@ class Shopify
     public function find($id)
     {
         try {
-            $data = $this->get([], $args = $id);
+            $data = $this->graphQLEnabled() ? $this->get($id) : $this->get([], $args = $id);
 
             if (isset(static::$resource_models[$this->api])) {
                 $class = static::$resource_models[$this->api];
