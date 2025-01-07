@@ -7,7 +7,7 @@ use Dan\Shopify\Util;
 
 final class RequestArgumentDTO
 {
-    public function __construct(public readonly bool $mutate = false, public $payload = null, public readonly array $queue = [], public readonly array $arguments = [])
+    public function __construct(public readonly bool $mutate = false, public $payload = null, public readonly array $queue = [], public readonly array $arguments = [], public ?string $append = null)
     {
 
     }

@@ -264,12 +264,35 @@ class Orders extends Endpoint
             return $this->getOrder();
         }
 
+        if ($this->dto->append === 'count') {
+            return $this->getOrdersCount();
+        }
+
         return $this->getOrders();
+    }
+
+    private function getOrdersCount()
+    {
+        $filters = $this->getFilters();
+        $header = $filters ? 'ordersCount($FILTERS)' : 'ordersCount()';
+
+        $fields = [
+            $header => [
+                'count',
+                'precision',
+            ],
+        ];
+
+        return [
+            'query' => ArrayGraphQL::convert($fields, ['$FILTERS' => $filters]),
+            'variables' => null,
+        ];
     }
 
     private function getOrders()
     {
-        $header = $this->dto->payload ? 'orders($PER_PAGE, $FILTER)' : 'orders($PER_PAGE)';
+        $filters = sprintf('%s %s', $this->getFilters(), $this->getSortOrder());
+        $header = $filters ? 'orders($PER_PAGE, $FILTERS)' : 'orders($PER_PAGE)';
 
         $fields = [
             $header => [
@@ -282,13 +305,13 @@ class Orders extends Endpoint
         return [
             'query' => ArrayGraphQL::convert($fields, [
                 '$PER_PAGE' => 'first: 50',
-                '$FILTER' => $this->getFilter(),
+                '$FILTERS' => $filters,
             ]),
             'variables' => null,
         ];
     }
 
-    private function getFilter()
+    private function getFilters()
     {
         if (! $this->dto->payload) {
             return null;
@@ -308,7 +331,7 @@ class Orders extends Endpoint
             $filters = $filters->merge([sprintf("(created_at:>='%s')", $created_at_min)]);
         }
 
-        return sprintf('query: "%s" %s', $filters->join(' OR '), $this->getSortOrder());
+        return sprintf('query: "%s"', $filters->join(' OR '));
     }
 
     private function getSortOrder()

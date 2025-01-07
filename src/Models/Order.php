@@ -192,6 +192,9 @@ class Order extends AbstractModel
     public function transformGraphQLResponse(array $response): ?array
     {
         $response = Util::convertKeysToSnakeCase($response);
+        if ($orders_count = Arr::get($response, 'data.orders_count')) {
+            return $orders_count;
+        }
 
         if ($orders = Arr::get($response, 'data.orders')) {
             return collect($orders)->map(fn ($row) => $this->formatOrder($row))->values()->all();
