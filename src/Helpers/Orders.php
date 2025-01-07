@@ -264,23 +264,42 @@ class Orders extends Endpoint
             return $this->getOrder();
         }
 
-        return [
-            'query' => ArrayGraphQL::convert($this->getOrders(), [
-                '$PER_PAGE' => 'first: 50',
-            ]),
-            'variables' => null,
-        ];
+        return $this->getOrders();
     }
 
     private function getOrders()
     {
-        return [
-            'orders($PER_PAGE)' => [
+        $header = $this->dto->payload ? 'orders($PER_PAGE, $FILTER)' : 'orders($PER_PAGE)';
+
+        $fields = [
+            $header => [
                 'edges' => [
                     'node' => $this->getFields(),
                 ],
             ],
         ];
+
+        return [
+            'query' => ArrayGraphQL::convert($fields, [
+                '$PER_PAGE' => 'first: 50',
+                '$FILTER' => $this->getFilter(),
+            ]),
+            'variables' => null,
+        ];
+    }
+
+    private function getFilter()
+    {
+        if (! $this->dto->payload) {
+            return null;
+        }
+
+        $filters = '';
+        if ($ids = $this->dto->payload['ids']) {
+            $filters .= collect(explode(',', $ids))->map(fn ($id) => sprintf('(id:%s)', $id))->join(' OR ');
+        }
+
+        return sprintf('query: "%s"', $filters);
     }
 
     private function getOrder()
