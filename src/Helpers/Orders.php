@@ -3,6 +3,7 @@
 namespace Dan\Shopify\Helpers;
 
 use Dan\Shopify\ArrayGraphQL;
+use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
 use Dan\Shopify\Util;
 use Illuminate\Support\Arr;
 
@@ -274,7 +275,7 @@ class Orders extends Endpoint
     private function getOrdersCount()
     {
         $filters = $this->getFilters();
-        $header = $filters ? 'ordersCount($FILTERS)' : 'ordersCount()';
+        $header = $filters ? 'ordersCount($FILTERS)' : 'ordersCount';
 
         $fields = [
             $header => [
@@ -370,78 +371,6 @@ class Orders extends Endpoint
 
     private function getMutation(): array
     {
-        throw new \Exception();
-        if ($this->dto->getResourceId()) {
-            return $this->updateMutation();
-        }
-
-        $payload = Arr::get($this->dto->payload, 'fulfillment_service', []);
-
-        $query = [
-            'fulfillmentServiceCreate($INPUT)' => [
-                'fulfillmentService' => $this->getFields(),
-                'userErrors' => [
-                    'field',
-                    'message',
-                ],
-            ],
-        ];
-
-        $variables = [
-            'name' => $payload['name'],
-            'callbackUrl' => $payload['callback_url'],
-            'inventoryManagement' => $payload['inventory_management'],
-            'trackingSupport' => $payload['tracking_support'],
-        ];
-
-        $query = ArrayGraphQL::convert(
-            $query,
-            [
-                '$INPUT' => 'name: $name, callbackUrl: $callbackUrl, inventoryManagement: $inventoryManagement, trackingSupport: $trackingSupport',
-            ],
-            'mutation CreateFulfillmentService($name: String!, $callbackUrl: URL!, $inventoryManagement: Boolean!, $trackingSupport: Boolean!)'
-        );
-
-        return [
-            'query' => $query,
-            'variables' => $variables,
-        ];
-    }
-
-    private function updateMutation(): array
-    {
-        throw new \Exception();
-        $payload = Arr::get($this->dto->payload, 'fulfillment_service', []);
-
-        $query = [
-            'fulfillmentServiceUpdate($INPUT)' => [
-                'fulfillmentService' => $this->getFields(),
-                'userErrors' => [
-                    'field',
-                    'message',
-                ],
-            ],
-        ];
-
-        $variables = [
-            'id' => $this->dto->getResourceId('FulfillmentService'),
-            'name' => $payload['name'],
-            'callbackUrl' => $payload['callback_url'],
-            'inventoryManagement' => $payload['inventory_management'],
-            'trackingSupport' => $payload['tracking_support'],
-        ];
-
-        $query = ArrayGraphQL::convert(
-            $query,
-            [
-                '$INPUT' => 'id: $id, name: $name, callbackUrl: $callbackUrl, inventoryManagement: $inventoryManagement, trackingSupport: $trackingSupport',
-            ],
-            'mutation CreateFulfillmentService($id: ID!, $name: String!, $callbackUrl: URL!, $inventoryManagement: Boolean!, $trackingSupport: Boolean!)'
-        );
-
-        return [
-            'query' => $query,
-            'variables' => $variables,
-        ];
+        throw new GraphQLEnabledWithMissingQueriesException('Mutation not supported yet');
     }
 }
