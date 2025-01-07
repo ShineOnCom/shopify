@@ -416,7 +416,7 @@ class Shopify
     public function get($query = [], $append = '')
     {
         if ($this->graphQLEnabled()) {
-            return $this->withGraphQL($query);
+            return $this->withGraphQL($query ?: (string) $append);
         }
 
         $api = $this->api;
@@ -617,7 +617,7 @@ class Shopify
     public function find($id)
     {
         try {
-            $data = $this->graphQLEnabled() ? $this->get($id) : $this->get([], $args = $id);
+            $data = $this->get([], $args = $id);
 
             if (isset(static::$resource_models[$this->api])) {
                 $class = static::$resource_models[$this->api];
