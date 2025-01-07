@@ -294,12 +294,17 @@ class Orders extends Endpoint
             return null;
         }
 
-        $filters = '';
+        $filters = collect([]);
         if ($ids = $this->dto->payload['ids']) {
-            $filters .= collect(explode(',', $ids))->map(fn ($id) => sprintf('(id:%s)', $id))->join(' OR ');
+            $ids = collect(explode(',', $ids))->map(fn ($id) => sprintf('(id:%s)', $id));
+            $filters = $filters->merge($ids);
         }
 
-        return sprintf('query: "%s"', $filters);
+        if ($name = $this->dto->payload['name']) {
+            $filters = $filters->merge([sprintf("(name:'%s')", $name)]);
+        }
+
+        return sprintf('query: "%s"', $filters->join(' OR '));
     }
 
     private function getOrder()
