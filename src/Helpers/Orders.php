@@ -308,7 +308,26 @@ class Orders extends Endpoint
             $filters = $filters->merge([sprintf("(created_at:>='%s')", $created_at_min)]);
         }
 
-        return sprintf('query: "%s"', $filters->join(' OR '));
+        return sprintf('query: "%s" %s', $filters->join(' OR '), $this->getSortOrder());
+    }
+
+    private function getSortOrder()
+    {
+        $order = Arr::get($this->dto->payload, 'order');
+        if (blank($order)) {
+            return '';
+        }
+
+        $order_params = explode(' ', $order);
+        $field = strtoupper($order);
+        $reverse = 'false';
+
+        if (count($order_params) === 2) {
+            $field = strtoupper($order_params[0]);
+            $reverse = strtolower($order_params[1]) === 'asc' ? 'false' : 'true';
+        }
+
+        return sprintf('sortKey: %s, reverse: %s', $field, $reverse);
     }
 
     private function getOrder()
