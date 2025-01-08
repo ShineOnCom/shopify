@@ -380,10 +380,10 @@ class Shopify
     /**
      * @throws GraphQLEnabledWithMissingQueriesException
      */
-    private function withGraphQL($payload = null, bool $mutate = false): ?array
+    private function withGraphQL($payload = null, ?string $append = null, bool $mutate = false): ?array
     {
         if ($this->graphQLEnabled()) {
-            $dto = new RequestArgumentDTO($mutate, $payload, $this->queue, $this->ids);
+            $dto = new RequestArgumentDTO($mutate, $payload, $this->queue, $this->ids, $append);
             $queryAndVariables = $this->{$this->api}->setRequestArgumentDTO($dto)->makeGraphQLQuery();
 
             $response = $this->graphql($queryAndVariables['query'], $queryAndVariables['variables']);
@@ -416,7 +416,7 @@ class Shopify
     public function get($query = [], $append = '')
     {
         if ($this->graphQLEnabled()) {
-            return $this->withGraphQL($query);
+            return $this->withGraphQL($query, $append);
         }
 
         $api = $this->api;
@@ -556,7 +556,7 @@ class Shopify
                 $this->queue[] = [$append, null];
             }
 
-            return $this->withGraphQL($payload, true);
+            return $this->withGraphQL($payload, null, true);
         }
 
         $api = $this->api;
@@ -617,7 +617,7 @@ class Shopify
     public function find($id)
     {
         try {
-            $data = $this->get([], $args = $id);
+            $data = $this->graphQLEnabled() ? $this->get($id) : $this->get([], $args = $id);
 
             if (isset(static::$resource_models[$this->api])) {
                 $class = static::$resource_models[$this->api];

@@ -336,8 +336,9 @@ class Util
         return $collection->mapWithKeys(function ($value, $key) {
             $snakeKey = Str::snake($key);
             if (is_array($value) || $value instanceof Collection) {
-                if (isset($value['edges']) && filled($value['edges'])) {
-                    $value = array_map(fn ($value) => $value['node'], $value['edges']);
+
+                if (isset($value['edges'])) {
+                    $value = filled($value['edges']) ? array_map(fn ($value) => $value['node'], $value['edges']) : [];
                 }
 
                 if (isset($value['nodes']) && filled($value['nodes'])) {
