@@ -57,7 +57,7 @@ class Webhooks extends Endpoint
 
         return [
             'query' => ArrayGraphQL::convert($fields, [
-                '$PER_PAGE' => 'first: 50',
+                '$PER_PAGE' => 'first: 250',
             ]),
             'variables' => null,
         ];
