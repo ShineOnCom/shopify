@@ -40,10 +40,6 @@ class Webhooks extends Endpoint
 
     private function getQuery()
     {
-        if ($this->dto->getResourceId()) {
-            return $this->getOrder();
-        }
-
         return $this->getWebhooks();
     }
 
