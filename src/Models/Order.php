@@ -268,7 +268,7 @@ class Order extends AbstractModel
                 'accept_language' => null,
                 'browser_height' => null,
                 'browser_width' => null,
-                'browser_ip' => $row['browser_ip'],
+                'browser_ip' => $row['client_ip'],
                 'session_hash' => null,
                 'user_agent' => null,
             ],

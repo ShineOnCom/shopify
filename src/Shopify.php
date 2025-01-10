@@ -31,6 +31,7 @@ use Dan\Shopify\Models\Variant;
 use Dan\Shopify\Models\Webhook;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Log;
@@ -394,6 +395,7 @@ class Shopify
                 throw new GraphQLRequestException($message);
             }
 
+            $this->cursors = Util::convertKeysToSnakeCase(collect(Arr::get($response, 'data'))->pluck('pageInfo')->first() ?? []);
             $response = (new static::$resource_models[$this->api]())->transformGraphQLResponse($response);
             static::log('log_api_response_data', $response);
 
@@ -477,10 +479,20 @@ class Shopify
         // Only limit key is allowed to exist with cursor based navigation
         foreach (array_keys($query) as $key) {
             if ($key !== 'limit') {
-                static::log('log_deprecation_warnings', ['Limit param is not allowed with cursored queries.']);
+                static::log('log_deprecation_warnings', ['Only limit key is allowed to exist with cursor based navigation']);
 
                 return [];
             }
+        }
+
+        if ($this->graphQLEnabled()) {
+            if (! Arr::get($this->cursors, 'has_next_page')) {
+                return [];
+            }
+
+            $query['page_info'] = $this->cursors;
+
+            return $this->get($query, $append);
         }
 
         // If cursors have been set and next hasn't been set, then return null.
