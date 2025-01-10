@@ -243,7 +243,7 @@ class Order extends AbstractModel
                 'fulfillment_service' => $line_item['fulfillment_service']['handle'],
                 'id' => (int) $line_item['id'],
                 'gift_card' => $line_item['is_gift_card'],
-                'grams' => null,
+                'grams' => 0,
                 'price' => Arr::get($line_item, 'original_unit_price_set.shop_money.amount'),
                 'price_set' => $line_item['original_unit_price_set'],
                 'product_exists' => isset($line_item['product']),
