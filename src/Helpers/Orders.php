@@ -351,7 +351,7 @@ class Orders extends Endpoint
             ],
         ];
 
-        $variables = Arr::get($this->dto->payload, 'order');
+        $variables = Util::convertKeysToCamelCase(Arr::get($this->dto->payload, 'order'));
         $variables['id'] = $this->dto->getResourceId('Order');
 
         return [

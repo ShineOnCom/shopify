@@ -355,4 +355,20 @@ class Util
             return [$snakeKey => $value];
         })->toArray();
     }
+
+    public static function convertKeysToCamelCase(array|Collection $collection): array
+    {
+        if (! $collection instanceof Collection) {
+            $collection = collect($collection);
+        }
+
+        return $collection->mapWithKeys(function ($value, $key) {
+            $camelCase = Str::camel($key);
+            if (is_array($value) || $value instanceof Collection) {
+                $value = static::convertKeysToSnakeCase(collect($value));
+            }
+
+            return [$camelCase => $value];
+        })->toArray();
+    }
 }
