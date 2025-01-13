@@ -87,13 +87,6 @@ class FulfillmentServices extends Endpoint
             ],
         ];
 
-        $variables = [
-            'name' => $payload['name'],
-            'callbackUrl' => $payload['callback_url'],
-            'inventoryManagement' => $payload['inventory_management'],
-            'trackingSupport' => $payload['tracking_support'],
-        ];
-
         $query = ArrayGraphQL::convert(
             $query,
             [
@@ -104,7 +97,7 @@ class FulfillmentServices extends Endpoint
 
         return [
             'query' => $query,
-            'variables' => $variables,
+            'variables' => Util::convertKeysToCamelCase($payload),
         ];
     }
 

@@ -332,6 +332,38 @@ class Orders extends Endpoint
 
     private function getMutation(): array
     {
-        throw new GraphQLEnabledWithMissingQueriesException('Mutation not supported yet');
+        if ($this->dto->getResourceId()) {
+            return $this->updateMutation();
+        }
+
+        throw new GraphQLEnabledWithMissingQueriesException('Only Order updates is supported.');
+    }
+
+    private function updateMutation(): array
+    {
+        $query = [
+            'orderUpdate($INPUT)' => [
+                'order' => $this->getFields(),
+                'userErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        $variables = Util::convertKeysToCamelCase(Arr::get($this->dto->payload, 'order'));
+        $variables['id'] = $this->dto->getResourceId('Order');
+
+        return [
+            'query' => ArrayGraphQL::convert(
+                $query,
+                [
+                    '$INPUT' => 'input: $input',
+                    '$PER_PAGE' => 'first: 250',
+                ],
+                'mutation UpdateOrder($input: OrderInput!)'
+            ),
+            'variables' => ['input' => $variables],
+        ];
     }
 }

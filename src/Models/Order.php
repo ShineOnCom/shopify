@@ -200,7 +200,7 @@ class Order extends AbstractModel
             return collect($orders)->map(fn ($row) => $this->formatOrder($row))->values()->all();
         }
 
-        $order = Arr::get($response, 'data.order', []);
+        $order = Arr::get($response, 'data.order_update.order', []) ?? Arr::get($response, 'data.order', []);
 
         return $this->formatOrder($order);
     }
