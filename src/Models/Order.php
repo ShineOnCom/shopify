@@ -200,6 +200,14 @@ class Order extends AbstractModel
             return collect($orders)->map(fn ($row) => $this->formatOrder($row))->values()->all();
         }
 
+        if ($order_cancel = Arr::get($response, 'data.order_cancel')) {
+            return $order_cancel;
+        }
+
+        if ($order_close = Arr::get($response, 'data.order_close')) {
+            return $order_close;
+        }
+
         $order = Arr::get($response, 'data.order_update.order', []) ?? Arr::get($response, 'data.order', []);
 
         return $this->formatOrder($order);

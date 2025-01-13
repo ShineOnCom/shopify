@@ -332,11 +332,19 @@ class Orders extends Endpoint
 
     private function getMutation(): array
     {
+        if ($this->dto->hasResourceInQueue('cancel')) {
+            return $this->cancelMutation();
+        }
+
+        if ($this->dto->hasResourceInQueue('delete')) {
+            return $this->deleteMutation();
+        }
+
         if ($this->dto->getResourceId()) {
             return $this->updateMutation();
         }
 
-        throw new GraphQLEnabledWithMissingQueriesException('Only Order updates is supported.');
+        throw new GraphQLEnabledWithMissingQueriesException('Creating an order is currently not implemented');
     }
 
     private function updateMutation(): array
@@ -364,6 +372,60 @@ class Orders extends Endpoint
                 'mutation UpdateOrder($input: OrderInput!)'
             ),
             'variables' => ['input' => $variables],
+        ];
+    }
+
+    private function cancelMutation(): array
+    {
+        $query = [
+            'orderCancel($INPUT)' => [
+                'orderCancelUserErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        return [
+            'query' => ArrayGraphQL::convert(
+                $query,
+                ['$INPUT' => 'orderId: $id, reason: $reason, refund: false, restock: false'],
+                'mutation CancelOrder($id: ID!, $reason: OrderCancelReason!)'
+            ),
+            'variables' => [
+                'id' => $this->dto->getResourceId('Order'),
+                'reason' => 'OTHER',
+            ],
+        ];
+    }
+
+    private function deleteMutation(): array
+    {
+        $query = [
+            'orderClose($INPUT)' => [
+                'order' => [
+                    'id',
+                    'closed',
+                    'closedAt',
+                ],
+                'userErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        return [
+            'query' => ArrayGraphQL::convert(
+                $query,
+                ['$INPUT' => 'input: $input'],
+                'mutation CloseOrder($input: OrderCloseInput!)'
+            ),
+            'variables' => [
+                'input' => [
+                    'id' => $this->dto->getResourceId('Order'),
+                ],
+            ],
         ];
     }
 }

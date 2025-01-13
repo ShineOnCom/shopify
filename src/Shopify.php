@@ -610,6 +610,12 @@ class Shopify
      */
     public function delete($query = [])
     {
+        if ($this->graphQLEnabled()) {
+            $this->queue[] = ['delete', null];
+
+            return $this->withGraphQL($query, null, true);
+        }
+
         $response = $this->request(
             $method = 'DELETE',
             $uri = $this->uri(),
