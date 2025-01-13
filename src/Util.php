@@ -365,7 +365,7 @@ class Util
         return $collection->mapWithKeys(function ($value, $key) {
             $camelCase = Str::camel($key);
             if (is_array($value) || $value instanceof Collection) {
-                $value = static::convertKeysToSnakeCase(collect($value));
+                $value = static::convertKeysToCamelCase(collect($value));
             }
 
             return [$camelCase => $value];
