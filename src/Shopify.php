@@ -279,6 +279,8 @@ class Shopify
 
     protected readonly string $shop;
 
+    protected static bool $graphql_pilot_enabled = false;
+
     /**
      * Shopify constructor.
      *
@@ -359,7 +361,8 @@ class Shopify
             return false;
         }
 
-        if (in_array($this->shop, config('shopify.graphql-pilot-stores'))) {
+        self::$graphql_pilot_enabled = in_array($this->shop, config('shopify.graphql-pilot-stores'));
+        if (self::$graphql_pilot_enabled) {
             $className = $this->{$this->api}::class;
             $method = (new ReflectionClass($className))->getMethod('makeGraphQLQuery');
 
@@ -1081,7 +1084,8 @@ class Shopify
 
     private static function log(string $type = 'log_api_request_data', ?array $context = [])
     {
-        if (Util::isLaravel() && config(sprintf('shopify.options.%s', $type))) {
+        $enabled = Util::isLaravel() && config(sprintf('shopify.options.%s', $type));
+        if ($enabled || self::$graphql_pilot_enabled) {
             $message = match ($type) {
                 'log_api_request_data' => 'vendor:dan:shopify:api:request',
                 'log_api_response_data' => 'vendor:dan:shopify:api:response',
