@@ -300,58 +300,19 @@ class Orders extends Endpoint
                 'edges' => [
                     'node' => $this->getFields(),
                 ],
+                'pageInfo' => $this->getPageInfoFields(),
             ],
         ];
 
+        $limit = Arr::get($this->dto->payload, 'limit', 50);
+
         return [
             'query' => ArrayGraphQL::convert($fields, [
-                '$PER_PAGE' => 'first: 50',
+                '$PER_PAGE' => "first: {$limit}",
                 '$FILTERS' => $filters,
             ]),
             'variables' => null,
         ];
-    }
-
-    private function getFilters()
-    {
-        if (! $this->dto->payload) {
-            return null;
-        }
-
-        $filters = collect([]);
-        if ($ids = Arr::get($this->dto->payload, 'ids')) {
-            $ids = collect(explode(',', $ids))->map(fn ($id) => sprintf('(id:%s)', $id));
-            $filters = $filters->merge($ids);
-        }
-
-        if ($name = Arr::get($this->dto->payload, 'name')) {
-            $filters = $filters->merge([sprintf("(name:'%s')", $name)]);
-        }
-
-        if ($created_at_min = Arr::get($this->dto->payload, 'created_at_min')) {
-            $filters = $filters->merge([sprintf("(created_at:>='%s')", $created_at_min)]);
-        }
-
-        return sprintf('query: "%s"', $filters->join(' OR '));
-    }
-
-    private function getSortOrder()
-    {
-        $order = Arr::get($this->dto->payload, 'order');
-        if (blank($order)) {
-            return '';
-        }
-
-        $order_params = explode(' ', $order);
-        $field = strtoupper($order);
-        $reverse = 'false';
-
-        if (count($order_params) === 2) {
-            $field = strtoupper($order_params[0]);
-            $reverse = strtolower($order_params[1]) === 'asc' ? 'false' : 'true';
-        }
-
-        return sprintf('sortKey: %s, reverse: %s', $field, $reverse);
     }
 
     private function getOrder()
@@ -371,6 +332,100 @@ class Orders extends Endpoint
 
     private function getMutation(): array
     {
-        throw new GraphQLEnabledWithMissingQueriesException('Mutation not supported yet');
+        if ($this->dto->hasResourceInQueue('cancel')) {
+            return $this->cancelMutation();
+        }
+
+        if ($this->dto->hasResourceInQueue('delete')) {
+            return $this->deleteMutation();
+        }
+
+        if ($this->dto->getResourceId()) {
+            return $this->updateMutation();
+        }
+
+        throw new GraphQLEnabledWithMissingQueriesException('Creating an order is currently not implemented');
+    }
+
+    private function updateMutation(): array
+    {
+        $query = [
+            'orderUpdate($INPUT)' => [
+                'order' => $this->getFields(),
+                'userErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        $variables = Util::convertKeysToCamelCase(Arr::get($this->dto->payload, 'order'));
+        $variables['id'] = $this->dto->getResourceId('Order');
+
+        return [
+            'query' => ArrayGraphQL::convert(
+                $query,
+                [
+                    '$INPUT' => 'input: $input',
+                    '$PER_PAGE' => 'first: 250',
+                ],
+                'mutation UpdateOrder($input: OrderInput!)'
+            ),
+            'variables' => ['input' => $variables],
+        ];
+    }
+
+    private function cancelMutation(): array
+    {
+        $query = [
+            'orderCancel($INPUT)' => [
+                'orderCancelUserErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        return [
+            'query' => ArrayGraphQL::convert(
+                $query,
+                ['$INPUT' => 'orderId: $id, reason: $reason, refund: false, restock: false'],
+                'mutation CancelOrder($id: ID!, $reason: OrderCancelReason!)'
+            ),
+            'variables' => [
+                'id' => $this->dto->getResourceId('Order'),
+                'reason' => 'OTHER',
+            ],
+        ];
+    }
+
+    private function deleteMutation(): array
+    {
+        $query = [
+            'orderClose($INPUT)' => [
+                'order' => [
+                    'id',
+                    'closed',
+                    'closedAt',
+                ],
+                'userErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        return [
+            'query' => ArrayGraphQL::convert(
+                $query,
+                ['$INPUT' => 'input: $input'],
+                'mutation CloseOrder($input: OrderCloseInput!)'
+            ),
+            'variables' => [
+                'input' => [
+                    'id' => $this->dto->getResourceId('Order'),
+                ],
+            ],
+        ];
     }
 }

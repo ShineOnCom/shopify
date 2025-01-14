@@ -200,7 +200,15 @@ class Order extends AbstractModel
             return collect($orders)->map(fn ($row) => $this->formatOrder($row))->values()->all();
         }
 
-        $order = Arr::get($response, 'data.order', []);
+        if ($order_cancel = Arr::get($response, 'data.order_cancel')) {
+            return $order_cancel;
+        }
+
+        if ($order_close = Arr::get($response, 'data.order_close')) {
+            return $order_close;
+        }
+
+        $order = Arr::get($response, 'data.order_update.order', []) ?? Arr::get($response, 'data.order', []);
 
         return $this->formatOrder($order);
     }
@@ -243,7 +251,7 @@ class Order extends AbstractModel
                 'fulfillment_service' => $line_item['fulfillment_service']['handle'],
                 'id' => (int) $line_item['id'],
                 'gift_card' => $line_item['is_gift_card'],
-                'grams' => null,
+                'grams' => 0,
                 'price' => Arr::get($line_item, 'original_unit_price_set.shop_money.amount'),
                 'price_set' => $line_item['original_unit_price_set'],
                 'product_exists' => isset($line_item['product']),
@@ -268,7 +276,7 @@ class Order extends AbstractModel
                 'accept_language' => null,
                 'browser_height' => null,
                 'browser_width' => null,
-                'browser_ip' => $row['browser_ip'],
+                'browser_ip' => $row['client_ip'],
                 'session_hash' => null,
                 'user_agent' => null,
             ],

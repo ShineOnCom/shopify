@@ -31,6 +31,7 @@ use Dan\Shopify\Models\Variant;
 use Dan\Shopify\Models\Webhook;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Log;
@@ -278,6 +279,8 @@ class Shopify
 
     protected readonly string $shop;
 
+    protected static bool $graphql_pilot_enabled = false;
+
     /**
      * Shopify constructor.
      *
@@ -358,7 +361,8 @@ class Shopify
             return false;
         }
 
-        if (in_array($this->shop, config('shopify.graphql-pilot-stores'))) {
+        self::$graphql_pilot_enabled = in_array($this->shop, config('shopify.graphql-pilot-stores'));
+        if (self::$graphql_pilot_enabled) {
             $className = $this->{$this->api}::class;
             $method = (new ReflectionClass($className))->getMethod('makeGraphQLQuery');
 
@@ -394,6 +398,7 @@ class Shopify
                 throw new GraphQLRequestException($message);
             }
 
+            $this->cursors = Util::convertKeysToSnakeCase(collect(Arr::get($response, 'data'))->pluck('pageInfo')->first() ?? []);
             $response = (new static::$resource_models[$this->api]())->transformGraphQLResponse($response);
             static::log('log_api_response_data', $response);
 
@@ -477,10 +482,20 @@ class Shopify
         // Only limit key is allowed to exist with cursor based navigation
         foreach (array_keys($query) as $key) {
             if ($key !== 'limit') {
-                static::log('log_deprecation_warnings', ['Limit param is not allowed with cursored queries.']);
+                static::log('log_deprecation_warnings', ['Only limit key is allowed to exist with cursor based navigation']);
 
                 return [];
             }
+        }
+
+        if ($this->graphQLEnabled()) {
+            if (! Arr::get($this->cursors, 'has_next_page')) {
+                return [];
+            }
+
+            $query['page_info'] = $this->cursors;
+
+            return $this->get($query, $append);
         }
 
         // If cursors have been set and next hasn't been set, then return null.
@@ -598,6 +613,12 @@ class Shopify
      */
     public function delete($query = [])
     {
+        if ($this->graphQLEnabled()) {
+            $this->queue[] = ['delete', null];
+
+            return $this->withGraphQL($query, null, true);
+        }
+
         $response = $this->request(
             $method = 'DELETE',
             $uri = $this->uri(),
@@ -1063,7 +1084,8 @@ class Shopify
 
     private static function log(string $type = 'log_api_request_data', ?array $context = [])
     {
-        if (Util::isLaravel() && config(sprintf('shopify.options.%s', $type))) {
+        $enabled = Util::isLaravel() && config(sprintf('shopify.options.%s', $type));
+        if ($enabled || self::$graphql_pilot_enabled) {
             $message = match ($type) {
                 'log_api_request_data' => 'vendor:dan:shopify:api:request',
                 'log_api_response_data' => 'vendor:dan:shopify:api:response',
