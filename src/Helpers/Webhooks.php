@@ -4,6 +4,7 @@ namespace Dan\Shopify\Helpers;
 
 use Dan\Shopify\ArrayGraphQL;
 use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
+use Dan\Shopify\Exceptions\InvalidGraphQLCallException;
 use Dan\Shopify\Util;
 
 /**
@@ -82,8 +83,22 @@ class Webhooks extends Endpoint
         ];
     }
 
+    private function createWebhook()
+    {
+        throw new InvalidGraphQLCallException('Create for Webhook not implemented');
+    }
+
+    private function deleteWebhook()
+    {
+        throw new InvalidGraphQLCallException('Delete for Webhook not implemented');
+    }
+
     private function getMutation(): array
     {
-        throw new InvalidGraphQLCallException('Mutation for Webhook not implemented');
+
+        var_dump($this->dto->mutate);
+        var_dump($this->dto->payload);
+
+        return $this->dto->payload ? $this->createWebhook() : $this->deleteWebhook();
     }
 }
