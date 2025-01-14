@@ -201,9 +201,14 @@ class Webhook extends AbstractModel
     {
         $response = Util::convertKeysToSnakeCase($response);
 
-        $data = Arr::get($response, 'data.webhook_subscriptions');
+        if ($data = Arr::get($response, 'data.webhook_subscriptions')){
 
-        return array_map(fn ($row) => $this->transformWebhookSubscription($row), $data);
+            return array_map(fn ($row) => $this->transformWebhookSubscription($row), $data);
+        }
+
+        $data = Arr::get($response, 'data.webhook_subscription');
+
+        return $this->transformWebhookSubscription($data);
     }
 
     private function transformWebhookSubscription(?array $row = null)

@@ -4,6 +4,7 @@ namespace Dan\Shopify\Helpers;
 
 use Dan\Shopify\ArrayGraphQL;
 use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
+use Dan\Shopify\Util;
 
 /**
  * Class Webhooks.
@@ -40,7 +41,25 @@ class Webhooks extends Endpoint
 
     private function getQuery()
     {
+        if ($this->dto->getResourceId()) {
+            return $this->getWebhook();
+        }
+
         return $this->getWebhooks();
+    }
+
+    private function getWebhook()
+    {
+        $fields = [
+            'webhookSubscription($ID)' => $this->getFields(),
+        ];
+
+        return [
+            'query' => ArrayGraphQL::convert($fields, [
+                '$ID' => Util::toGraphQLIdParam($this->dto->getResourceId(), 'WebhookSubscription'),
+            ]),
+            'variables' => null,
+        ];
     }
 
     private function getWebhooks()
@@ -65,6 +84,6 @@ class Webhooks extends Endpoint
 
     private function getMutation(): array
     {
-        throw new GraphQLEnabledWithMissingQueriesException('Mutation not supported yet');
+        throw new InvalidGraphQLCallException('Mutation for Webhook not implemented');
     }
 }
