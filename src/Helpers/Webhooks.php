@@ -90,15 +90,21 @@ class Webhooks extends Endpoint
 
     private function deleteWebhook()
     {
-        throw new InvalidGraphQLCallException('Delete for Webhook not implemented');
+        if ($id = $this->dto->getResourceId()) {
+            throw new InvalidGraphQLCallException('Delete for Webhook not implemented');
+        }
+
+        throw new InvalidGraphQLCallException('ID required to delete webhook');
     }
 
     private function getMutation(): array
-    {
+     {
+        if ($this->dto->payload) {
+            return $this->createWebhook();
+        }
 
-        var_dump($this->dto->mutate);
-        var_dump($this->dto->payload);
-
-        return $this->dto->payload ? $this->createWebhook() : $this->deleteWebhook();
+        if ($this->dto->hasResourceInQueue('delete')) {
+            return $this->deleteWebhook();
+        }
     }
 }
