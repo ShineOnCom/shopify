@@ -41,12 +41,30 @@ class Image extends AbstractModel
         'variant_ids' => 'array',
     ];
 
-    public function transformGraphQLResponse(array $response)
+    public function transformGraphQLResponse(array $response): ?array
     {
         $flattenedResponse = Util::convertKeysToSnakeCase($response['data']);
 
-        $images = [];
+        if (isset($flattenedResponse['node']['image'])) {
+            $node = $flattenedResponse['node'];
+            $image = $node['image'];
 
+            return [
+                'id' => (int) $image['id'],
+                'alt' => $image['alt_text'] ?: null,
+                'position' => null,
+                'product_id' => (int) null,
+                'created_at' => $node['created_at'],
+                'updated_at' => $node['updated_at'],
+                'admin_graphql_api_id' => 'gid://shopify/MediaImage/'.$image['id'],
+                'width' => $image['width'],
+                'height' => $image['height'],
+                'src' => $image['url'],
+                'variant_ids' => [],
+            ];
+        }
+
+        $images = [];
         foreach ($flattenedResponse as $product) {
             foreach ($product['images'] as $key => $image) {
                 $images[] = [
