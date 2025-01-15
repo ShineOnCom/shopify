@@ -6,6 +6,7 @@ use Dan\Shopify\DTOs\RequestArgumentDTO;
 use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
 use Dan\Shopify\Exceptions\InvalidOrMissingEndpointException;
 use Dan\Shopify\Shopify;
+use Illuminate\Support\Arr;
 
 /**
  * Class Endpoint.
@@ -144,5 +145,62 @@ abstract class Endpoint
     public function makeGraphQLQuery(): array
     {
         throw new GraphQLEnabledWithMissingQueriesException('Please override makeGraphQLQuery in child class');
+    }
+
+    protected function getPageInfoFields()
+    {
+        return [
+            'hasPreviousPage',
+            'hasNextPage',
+            'startCursor',
+            'endCursor',
+        ];
+    }
+
+    protected function getFilters()
+    {
+        if (! $this->dto->payload) {
+            return null;
+        }
+
+        $cursor = '';
+        if ($page_info = Arr::get($this->dto->payload, 'page_info')) {
+            $cursor = sprintf('after: "%s"', Arr::get($page_info, 'end_cursor'));
+        }
+
+        $filters = collect([]);
+        if ($ids = Arr::get($this->dto->payload, 'ids')) {
+            $ids = collect(explode(',', $ids))->map(fn ($id) => sprintf('(id:%s)', $id));
+            $filters = $filters->merge($ids);
+        }
+
+        if ($name = Arr::get($this->dto->payload, 'name')) {
+            $filters = $filters->merge([sprintf("(name:'%s')", $name)]);
+        }
+
+        if ($created_at_min = Arr::get($this->dto->payload, 'created_at_min')) {
+            $filters = $filters->merge([sprintf("(created_at:>='%s')", $created_at_min)]);
+        }
+
+        return trim(sprintf('query: "%s" %s', $filters->join(' OR '), $cursor));
+    }
+
+    protected function getSortOrder()
+    {
+        $order = Arr::get($this->dto->payload, 'order');
+        if (blank($order)) {
+            return '';
+        }
+
+        $order_params = explode(' ', $order);
+        $field = strtoupper($order);
+        $reverse = 'false';
+
+        if (count($order_params) === 2) {
+            $field = strtoupper($order_params[0]);
+            $reverse = strtolower($order_params[1]) === 'asc' ? 'false' : 'true';
+        }
+
+        return sprintf('sortKey: %s, reverse: %s', $field, $reverse);
     }
 }

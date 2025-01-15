@@ -31,9 +31,12 @@ use Dan\Shopify\Models\Variant;
 use Dan\Shopify\Models\Webhook;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
+use Log;
 use Psr\Http\Message\MessageInterface;
+use ReflectionClass;
 
 /**
  * Class Shopify.
@@ -274,6 +277,10 @@ class Shopify
      */
     protected $client;
 
+    protected readonly string $shop;
+
+    protected static bool $graphql_pilot_enabled = false;
+
     /**
      * Shopify constructor.
      *
@@ -283,8 +290,8 @@ class Shopify
      */
     public function __construct($shop, $token, $base = null)
     {
-        $shop = Util::normalizeDomain($shop);
-        $base_uri = "https://{$shop}";
+        $this->shop = Util::normalizeDomain($shop);
+        $base_uri = "https://{$this->shop}";
 
         $this->setBase($base);
 
@@ -350,16 +357,37 @@ class Shopify
 
     private function graphQLEnabled(): bool
     {
-        return $this->api && $this->{$this->api}->graphQLEnabled();
+        if (! $this->api) {
+            return false;
+        }
+
+        self::$graphql_pilot_enabled = in_array($this->shop, config('shopify.graphql-pilot-stores'));
+        if (self::$graphql_pilot_enabled) {
+            $className = $this->{$this->api}::class;
+            $method = (new ReflectionClass($className))->getMethod('makeGraphQLQuery');
+
+            // GraphQL is only supported if the method has been overridden.
+            if ($method->getDeclaringClass()->getName() === $className) {
+                Log::warning("vendor:dan:shopify:graphql:pilot:supported:{$this->shop}", ['api' => $this->api]);
+
+                return true;
+            } else {
+                Log::warning("vendor:dan:shopify:graphql:pilot:not-supported:{$this->shop}", ['api' => $this->api]);
+
+                return false;
+            }
+        }
+
+        return $this->{$this->api}->graphQLEnabled();
     }
 
     /**
      * @throws GraphQLEnabledWithMissingQueriesException
      */
-    private function withGraphQL($payload = null, bool $mutate = false): ?array
+    private function withGraphQL($payload = null, ?string $append = null, bool $mutate = false): ?array
     {
         if ($this->graphQLEnabled()) {
-            $dto = new RequestArgumentDTO($mutate, $payload, $this->queue, $this->ids);
+            $dto = new RequestArgumentDTO($mutate, $payload, $this->queue, $this->ids, $append);
             $queryAndVariables = $this->{$this->api}->setRequestArgumentDTO($dto)->makeGraphQLQuery();
 
             $response = $this->graphql($queryAndVariables['query'], $queryAndVariables['variables']);
@@ -370,6 +398,7 @@ class Shopify
                 throw new GraphQLRequestException($message);
             }
 
+            $this->cursors = Util::convertKeysToSnakeCase(collect(Arr::get($response, 'data'))->pluck('pageInfo')->first() ?? []);
             $response = (new static::$resource_models[$this->api]())->transformGraphQLResponse($response);
             static::log('log_api_response_data', $response);
 
@@ -392,7 +421,7 @@ class Shopify
     public function get($query = [], $append = '')
     {
         if ($this->graphQLEnabled()) {
-            return $this->withGraphQL($query);
+            return $this->withGraphQL($query, $append);
         }
 
         $api = $this->api;
@@ -453,10 +482,20 @@ class Shopify
         // Only limit key is allowed to exist with cursor based navigation
         foreach (array_keys($query) as $key) {
             if ($key !== 'limit') {
-                static::log('log_deprecation_warnings', ['Limit param is not allowed with cursored queries.']);
+                static::log('log_deprecation_warnings', ['Only limit key is allowed to exist with cursor based navigation']);
 
                 return [];
             }
+        }
+
+        if ($this->graphQLEnabled()) {
+            if (! Arr::get($this->cursors, 'has_next_page')) {
+                return [];
+            }
+
+            $query['page_info'] = $this->cursors;
+
+            return $this->get($query, $append);
         }
 
         // If cursors have been set and next hasn't been set, then return null.
@@ -532,7 +571,7 @@ class Shopify
                 $this->queue[] = [$append, null];
             }
 
-            return $this->withGraphQL($payload, true);
+            return $this->withGraphQL($payload, null, true);
         }
 
         $api = $this->api;
@@ -574,6 +613,12 @@ class Shopify
      */
     public function delete($query = [])
     {
+        if ($this->graphQLEnabled()) {
+            $this->queue[] = ['delete', null];
+
+            return $this->withGraphQL($query, null, true);
+        }
+
         $response = $this->request(
             $method = 'DELETE',
             $uri = $this->uri(),
@@ -593,7 +638,7 @@ class Shopify
     public function find($id)
     {
         try {
-            $data = $this->get([], $args = $id);
+            $data = $this->graphQLEnabled() ? $this->get($id) : $this->get([], $args = $id);
 
             if (isset(static::$resource_models[$this->api])) {
                 $class = static::$resource_models[$this->api];
@@ -1039,7 +1084,8 @@ class Shopify
 
     private static function log(string $type = 'log_api_request_data', ?array $context = [])
     {
-        if (Util::isLaravel() && config(sprintf('shopify.options.%s', $type))) {
+        $enabled = Util::isLaravel() && config(sprintf('shopify.options.%s', $type));
+        if ($enabled || self::$graphql_pilot_enabled) {
             $message = match ($type) {
                 'log_api_request_data' => 'vendor:dan:shopify:api:request',
                 'log_api_response_data' => 'vendor:dan:shopify:api:response',
