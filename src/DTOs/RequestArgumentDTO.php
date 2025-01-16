@@ -43,7 +43,7 @@ final class RequestArgumentDTO
             return $this->arguments[0];
         }
 
-        return null;
+        return (string) $this->payload ?: null;
     }
 
     public function findResourceIdInQueue(string $resource)
