@@ -88,6 +88,10 @@ class Product extends AbstractModel
             return $products_count;
         }
 
+        if ($product_delete = Arr::get($response, 'data.product_delete')) {
+            return $product_delete;
+        }
+
         if ($products = Arr::get($response, 'data.products')) {
             return collect($products)->map(fn ($row) => $this->format($row))->values()->all();
         }

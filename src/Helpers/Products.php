@@ -182,6 +182,34 @@ class Products extends Endpoint
 
     private function getMutation(): array
     {
+        if ($this->dto->hasResourceInQueue('delete')) {
+            return $this->deleteMutation();
+        }
+
         throw new GraphQLEnabledWithMissingQueriesException('Mutation not supported yet');
+    }
+
+    private function deleteMutation(): array
+    {
+        $query = [
+            'productDelete($INPUT)' => [
+                'deletedProductId',
+                'userErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        return [
+            'query' => ArrayGraphQL::convert(
+                $query,
+                ['$INPUT' => 'input: { id: $id }'],
+                'mutation DeleteProduct($id: ID!)'
+            ),
+            'variables' => [
+                'id' => $this->dto->getResourceId('Product'),
+            ],
+        ];
     }
 }
