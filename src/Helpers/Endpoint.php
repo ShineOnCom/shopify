@@ -203,4 +203,9 @@ abstract class Endpoint
 
         return sprintf('sortKey: %s, reverse: %s', $field, $reverse);
     }
+
+    protected function getFiltersAndSortOrder(): string
+    {
+        return sprintf('%s %s', $this->getFilters(), $this->getSortOrder());
+    }
 }

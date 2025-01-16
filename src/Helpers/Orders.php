@@ -292,7 +292,7 @@ class Orders extends Endpoint
 
     private function getOrders()
     {
-        $filters = sprintf('%s %s', $this->getFilters(), $this->getSortOrder());
+        $filters = $this->getFiltersAndSortOrder();
         $header = $filters ? 'orders($PER_PAGE, $FILTERS)' : 'orders($PER_PAGE)';
 
         $fields = [

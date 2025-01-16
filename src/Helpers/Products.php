@@ -142,8 +142,11 @@ class Products extends Endpoint
 
     private function getProducts()
     {
+        $filters = $this->getFiltersAndSortOrder();
+        $header = $filters ? 'products($PER_PAGE, $FILTERS)' : 'products($PER_PAGE)';
+
         $fields = [
-            'products($PER_PAGE)' => [
+            $header => [
                 'edges' => [
                     'node' => $this->getFields(),
                 ],
@@ -156,6 +159,7 @@ class Products extends Endpoint
         return [
             'query' => ArrayGraphQL::convert($fields, [
                 '$PER_PAGE' => "first: {$limit}",
+                '$FILTERS' => $filters,
             ]),
             'variables' => null,
         ];
