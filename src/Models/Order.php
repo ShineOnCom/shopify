@@ -208,7 +208,7 @@ class Order extends AbstractModel
             return $order_close;
         }
 
-        $order = Arr::get($response, 'data.order_update.order', []) ?? Arr::get($response, 'data.order', []);
+        $order = Arr::get($response, 'data.order_update.order') ?? Arr::get($response, 'data.order', []);
 
         return $this->formatOrder($order);
     }
