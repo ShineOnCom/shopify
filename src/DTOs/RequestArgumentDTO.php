@@ -30,7 +30,7 @@ final class RequestArgumentDTO
     private function findResourceId()
     {
         if ($this->payload) {
-            if (is_string($this->payload)) {
+            if (is_string($this->payload) || is_int($this->payload)) {
                 return $this->payload;
             }
 
@@ -43,7 +43,7 @@ final class RequestArgumentDTO
             return $this->arguments[0];
         }
 
-        return (string) $this->payload ?: null;
+        return null;
     }
 
     public function findResourceIdInQueue(string $resource)

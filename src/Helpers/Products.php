@@ -125,7 +125,7 @@ class Products extends Endpoint
     private function getProductsCount()
     {
         $filters = $this->getFilters();
-        $header = $filters ? 'ordersCount($FILTERS)' : 'ordersCount';
+        $header = $filters ? 'productsCount($FILTERS)' : 'productsCount';
 
         $fields = [
             $header => [
