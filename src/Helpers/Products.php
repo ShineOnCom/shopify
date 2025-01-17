@@ -186,7 +186,56 @@ class Products extends Endpoint
             return $this->deleteMutation();
         }
 
+        if ($this->dto->getResourceId()) {
+            return $this->updateMutation();
+        }
+
         throw new GraphQLEnabledWithMissingQueriesException('Mutation not supported yet');
+    }
+
+    private function updateMutation(): array
+    {
+        $query = [
+            'productUpdate($INPUT)' => [
+                'product' => $this->getFields(),
+                'userErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        $variables = Util::convertKeysToCamelCase(Arr::get($this->dto->payload, 'product'));
+        $variables['id'] = $this->dto->getResourceId('Product');
+        if ($variables['variants']) {
+            $variables['variants'] = array_map(function ($variant) {
+                $variant['id'] = Util::toGid($variant['id'], 'ProductVariant');
+
+                return $variant;
+            }, $variables['variants']);
+        }
+
+        if ($options = Arr::get($variables, 'options')) {
+            unset($variables['options']);
+
+            $options = is_array($options[0]) ? $options : [$options];
+            $options = array_map(function ($option) {
+                $option['values'] = array_map(fn ($value) => ['name' => $value], $option['values']);
+
+                return $option;
+            }, $options);
+
+            $variables['productOptions'] = $options;
+        }
+
+        return [
+            'query' => ArrayGraphQL::convert(
+                $query,
+                ['$INPUT' => 'input: $input', '$PER_PAGE' => 'first: 250'],
+                'mutation UpdateProduct($input: ProductInput!)'
+            ),
+            'variables' => ['input' => $variables],
+        ];
     }
 
     private function deleteMutation(): array
