@@ -85,13 +85,69 @@ class Webhooks extends Endpoint
 
     private function createWebhook()
     {
-        throw new InvalidGraphQLCallException('Create for Webhook not implemented');
+        $payload = $this->dto->payload->toArray();
+
+        $payload_fixed = [
+            'topic' => $payload['topic'],
+            'webhook_subscription' => [
+                'callback_url' => $payload['address'],
+                'format' => 'JSON',
+            ],
+        ];
+
+        $query = [
+            'webhookSubscriptionCreate($INPUT)' => [
+                'webhookSubscription' => $this->getFields(),
+                'userErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        $query = ArrayGraphQL::convert(
+            $query,
+            [
+                '$INPUT' => 'topic: $topic, webhookSubscription: $webhookSubscription',
+            ],
+            'mutation webhookSubscriptionCreate($topic: WebhookSubscriptionTopic!, $webhookSubscription: WebhookSubscriptionInput!)'
+        );
+
+        var_dump(['variables' => Util::convertKeysToCamelCase($payload_fixed)]);
+
+        return [
+            'query' => $query,
+            'variables' => Util::convertKeysToCamelCase($payload_fixed),
+        ];
     }
 
     private function deleteWebhook()
     {
         if ($id = $this->dto->getResourceId()) {
-            throw new InvalidGraphQLCallException('Delete for Webhook not implemented');
+            $query = [
+                'webhookSubscriptionDelete($ID)' => [
+                    'deletedWebhookSubscriptionId',
+                    'userErrors' => [
+                        'field',
+                        'message',
+                    ],
+                ],
+            ];
+
+            $variables = [
+                'id' => $this->dto->getResourceId('WebhookSubscription'),
+            ];
+
+            $query = ArrayGraphQL::convert(
+                $query,
+                ['$ID' => 'id: $id'],
+                'mutation webhookSubscriptionDelete($id: ID!)'
+            );
+
+            return [
+                'query' => $query,
+                'variables' => $variables,
+            ];
         }
 
         throw new InvalidGraphQLCallException('ID required to delete webhook');
