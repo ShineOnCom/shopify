@@ -135,7 +135,7 @@ class Variants extends Endpoint
 
         return [
             'query' => $query,
-            'variables' => ['productId' => $productId, 'variants' => $variants],
+            'variables' => ['productId' => Util::toGid($productId, 'Product'), 'variants' => $variants],
         ];
     }
 }

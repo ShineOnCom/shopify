@@ -149,10 +149,8 @@ class Products extends Endpoint
     private function updateMutation(): array
     {
         $variables = Util::convertKeysToCamelCase(Arr::get($this->dto->payload, 'product'));
-        $variables['id'] = $this->dto->getResourceId('Product');
-        $this->formatOptionsVariableForMutation($variables);
-
         $variantsQueryAndVariables = Variants::getMutationForProduct($this->dto->getResourceId(), $variables['variants']);
+
         $query = [
             'productUpdate($PRODUCT_INPUT)' => [
                 'product' => $this->getFields(),
@@ -163,6 +161,11 @@ class Products extends Endpoint
             ],
             ...$variantsQueryAndVariables['query'],
         ];
+
+        $variables['id'] = $this->dto->getResourceId('Product');
+        $this
+            ->formatOptionsVariableForMutation($variables)
+            ->formatVariantsVariableForMutation($variables);
 
         return [
             'query' => ArrayGraphQL::convert(
@@ -195,6 +198,13 @@ class Products extends Endpoint
 
             $variables['productOptions'] = $options;
         }
+
+        return $this;
+    }
+
+    private function formatVariantsVariableForMutation(&$variables): self
+    {
+        unset($variables['variants']);
 
         return $this;
     }
