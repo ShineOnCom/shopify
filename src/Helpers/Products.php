@@ -148,26 +148,41 @@ class Products extends Endpoint
 
     private function updateMutation(): array
     {
+        $variables = Util::convertKeysToCamelCase(Arr::get($this->dto->payload, 'product'));
+        $variables['id'] = $this->dto->getResourceId('Product');
+        $this->formatOptionsVariableForMutation($variables);
+
+        $variantsQueryAndVariables = Variants::getMutationForProduct($this->dto->getResourceId(), $variables['variants']);
         $query = [
-            'productUpdate($INPUT)' => [
+            'productUpdate($PRODUCT_INPUT)' => [
                 'product' => $this->getFields(),
                 'userErrors' => [
                     'field',
                     'message',
                 ],
             ],
+            ...$variantsQueryAndVariables['query'],
         ];
 
-        $variables = Util::convertKeysToCamelCase(Arr::get($this->dto->payload, 'product'));
-        $variables['id'] = $this->dto->getResourceId('Product');
-        if ($variables['variants']) {
-            $variables['variants'] = array_map(function ($variant) {
-                $variant['id'] = Util::toGid($variant['id'], 'ProductVariant');
+        return [
+            'query' => ArrayGraphQL::convert(
+                $query,
+                [
+                    '$PRODUCT_INPUT' => 'input: $input',
+                    '$PER_PAGE' => 'first: 250',
+                    '$VARIANT_INPUT' => 'productId: $productId, variants: $variants',
+                ],
+                'mutation UpdateProduct($input: ProductInput!, $productId: ID!, $variants: [ProductVariantsBulkInput!]!)'
+            ),
+            'variables' => [
+                'input' => $variables,
+                ...$variantsQueryAndVariables['variables'],
+            ],
+        ];
+    }
 
-                return $variant;
-            }, $variables['variants']);
-        }
-
+    private function formatOptionsVariableForMutation(&$variables): self
+    {
         if ($options = Arr::get($variables, 'options')) {
             unset($variables['options']);
 
@@ -181,14 +196,7 @@ class Products extends Endpoint
             $variables['productOptions'] = $options;
         }
 
-        return [
-            'query' => ArrayGraphQL::convert(
-                $query,
-                ['$INPUT' => 'input: $input', '$PER_PAGE' => 'first: 250'],
-                'mutation UpdateProduct($input: ProductInput!)'
-            ),
-            'variables' => ['input' => $variables],
-        ];
+        return $this;
     }
 
     private function deleteMutation(): array
