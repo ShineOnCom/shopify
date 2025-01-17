@@ -22,7 +22,7 @@ class Variants extends Endpoint
         return $this->dto->mutate ? $this->getMutation() : $this->getQuery();
     }
 
-    public function getFields()
+    public static function getFields()
     {
         return [
             'barcode',
@@ -84,7 +84,7 @@ class Variants extends Endpoint
     {
         $fields = [
             'node($INPUT)' => [
-                '... on ProductVariant' => $this->getFields(),
+                '... on ProductVariant' => self::getFields(),
             ],
         ];
 
@@ -110,7 +110,7 @@ class Variants extends Endpoint
     {
         $query = [
             'variantUpdate($INPUT)' => [
-                'variant' => $this->getFields(),
+                'variant' => self::getFields(),
                 'userErrors' => [
                     'field',
                     'message',

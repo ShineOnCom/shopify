@@ -45,54 +45,7 @@ class Products extends Endpoint
             ],
             'variants($PER_PAGE)' => [
                 'edges' => [
-                    'node' => [
-                        'barcode',
-                        'compareAtPrice',
-                        'createdAt',
-                        'selectedOptions' => [
-                            'name',
-                            'value',
-                        ],
-                        'inventoryItem' => [
-                            'id',
-                            'requiresShipping',
-                            'measurement' => [
-                                'id',
-                                'weight' => [
-                                    'unit',
-                                    'value',
-                                ],
-                            ],
-                            'inventoryLevels($PER_PAGE)' => [
-                                'edges' => [
-                                    'node' => [
-                                        'location' => [
-                                            'fulfillmentService' => [
-                                                'id',
-                                                'handle',
-                                                'serviceName',
-                                            ],
-                                        ],
-                                    ],
-                                ],
-                            ],
-                        ],
-                        'id',
-                        'image' => [
-                            'id',
-                        ],
-                        'inventoryPolicy',
-                        'inventoryQuantity',
-                        'position',
-                        'price',
-                        'product' => [
-                            'id',
-                        ],
-                        'sku',
-                        'taxable',
-                        'title',
-                        'updatedAt',
-                    ],
+                    'node' => Variants::getFields(),
                 ],
             ],
             'images($PER_PAGE)' => [

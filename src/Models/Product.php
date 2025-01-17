@@ -131,27 +131,8 @@ class Product extends AbstractModel
         }, Arr::get($row, 'options', []));
 
         $variants = array_map(function ($variant) use ($product_id) {
-            $variant['id'] = (int) $variant['id'];
-            $variant['admin_graphql_api_id'] = Util::toGid($variant['id'], 'ProductVariant');
+            $variant = Variant::format($variant);
             $variant['product_id'] = $product_id;
-
-            $location = collect(Arr::get($variant, 'inventory_item.inventory_levels'))->first();
-
-            $variant['fulfillment_service'] = Arr::get($location, 'location.fulfillment_service.handle');
-            $variant['inventory_item_id'] = (int) Util::getIdFromGid(Arr::get($variant, 'inventory_item.id'));
-            $variant['inventory_management'] = null;
-            $variant['grams'] = null;
-            $variant['image_id'] = null;
-            $variant['old_inventory_quantity'] = null;
-            $variant['requires_shipping'] = Arr::get($variant, 'inventory.requires_shipping');
-            $variant['weight'] = Arr::get($variant, 'inventory_item.measurement.weight.value');
-            $variant['weight_unit'] = Arr::get($variant, 'inventory_item.measurement.weight.unit');
-
-            $option_id = 1;
-            foreach (Arr::get($variant, 'selected_options') as $option) {
-                $variant["option{$option_id}"] = $option['value'];
-                $option_id++;
-            }
 
             return $variant;
         }, Arr::get($row, 'variants', []));
