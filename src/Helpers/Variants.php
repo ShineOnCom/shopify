@@ -100,42 +100,4 @@ class Variants extends Endpoint
     {
         throw new GraphQLEnabledWithMissingQueriesException('Mutation not supported directly. Please use products');
     }
-
-    /**
-     * This is only meant to be called from the Products Helper. It does not return a graphql query but the array as this would be merged in the product class
-     */
-    public static function getMutationForProduct(int $productId = 0, array $variants = []): array
-    {
-        if (empty($variants)) {
-            return ['query' => [], 'variables' => []];
-        }
-
-        $query = [
-            'productVariantsBulkUpdate($VARIANT_INPUT)' => [
-                'productVariants' => [
-                    'id',
-                ],
-                'userErrors' => [
-                    'field',
-                    'message',
-                ],
-            ],
-        ];
-
-        $variants = array_map(function ($variant) {
-            $variant['id'] = Util::toGid($variant['id'], 'ProductVariant');
-            if ($variant['fulfillment_service_id']) {
-                $variant['inventoryItem'] = ['fulfillmentServiceId' => Util::toGid($variant['fulfillment_service_id'], 'FulfillmentService')];
-                unset($variant['fulfillment_service']);
-                unset($variant['fulfillment_service_id']);
-            }
-
-            return $variant;
-        }, $variants);
-
-        return [
-            'query' => $query,
-            'variables' => ['productId' => Util::toGid($productId, 'Product'), 'variants' => $variants],
-        ];
-    }
 }

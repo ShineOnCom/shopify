@@ -13,9 +13,7 @@ final class RequestArgumentDTO
         public readonly array $queue = [],
         public readonly array $arguments = [],
         public ?string $append = null
-    ) {
-
-    }
+    ) {}
 
     public function getResourceId(?string $graphQLResourceName = null)
     {
@@ -41,6 +39,10 @@ final class RequestArgumentDTO
 
         if (! empty($this->arguments)) {
             return $this->arguments[0];
+        }
+
+        if (! empty($this->queue) && filled($this->queue[0]) && $this->queue[0][1] === null) {
+            return $this->queue[0][0];
         }
 
         return null;

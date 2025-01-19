@@ -3,7 +3,6 @@
 namespace Dan\Shopify\Helpers;
 
 use Dan\Shopify\ArrayGraphQL;
-use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
 use Dan\Shopify\Util;
 use Illuminate\Support\Arr;
 
@@ -139,33 +138,22 @@ class Products extends Endpoint
             return $this->deleteMutation();
         }
 
-        if ($this->dto->getResourceId()) {
-            return $this->updateMutation();
-        }
-
-        throw new GraphQLEnabledWithMissingQueriesException('Mutation not supported yet');
+        return $this->saveMutation();
     }
 
-    private function updateMutation(): array
+    private function saveMutation(): array
     {
-        $variables = Util::convertKeysToCamelCase(Arr::get($this->dto->payload, 'product'));
-        $variantsQueryAndVariables = Variants::getMutationForProduct($this->dto->getResourceId(), $variables['variants']);
+        $header = $this->dto->getResourceId() ? 'productUpdate($PRODUCT_INPUT)' : 'productCreate($PRODUCT_INPUT)';
 
         $query = [
-            'productUpdate($PRODUCT_INPUT)' => [
+            $header => [
                 'product' => $this->getFields(),
                 'userErrors' => [
                     'field',
                     'message',
                 ],
             ],
-            ...$variantsQueryAndVariables['query'],
         ];
-
-        $variables['id'] = $this->dto->getResourceId('Product');
-        $this
-            ->formatOptionsVariableForMutation($variables)
-            ->formatVariantsVariableForMutation($variables);
 
         return [
             'query' => ArrayGraphQL::convert(
@@ -173,22 +161,69 @@ class Products extends Endpoint
                 [
                     '$PRODUCT_INPUT' => 'input: $input',
                     '$PER_PAGE' => 'first: 250',
-                    '$VARIANT_INPUT' => 'productId: $productId, variants: $variants',
                 ],
-                'mutation UpdateProduct($input: ProductInput!, $productId: ID!, $variants: [ProductVariantsBulkInput!]!)'
+                'mutation SaveProduct($input: ProductInput!)'
             ),
             'variables' => [
-                'input' => $variables,
-                ...$variantsQueryAndVariables['variables'],
+                'input' => $this->getVariables(),
             ],
         ];
     }
 
+    private function getVariables(): array
+    {
+        $variables = [];
+        $variables = Util::convertKeysToCamelCase(Arr::get($this->dto->payload, 'product'));
+        if ($this->dto->getResourceId()) {
+            $variables['id'] = $this->dto->getResourceId('Product');
+        }
+
+        $this
+            ->formatOptionsVariableForMutation($variables)
+            ->mapFields($variables);
+
+        return $variables;
+    }
+
+    private function mapFields(&$variables): self
+    {
+        $supportedKeysInProductInput = [
+            'category' => 'category',
+            'claimOwnership' => 'claimOwnership',
+            'collectionsToJoin' => 'collectionsToJoin',
+            'collectionsToLeave' => 'collectionsToLeave',
+            'combinedListingRole' => 'combinedListingRole',
+            'bodyHtml' => 'descriptionHtml',
+            'giftCard' => 'giftCard',
+            'giftCardTemplateSuffix' => 'giftCardTemplateSuffix',
+            'handle' => 'handle',
+            'metafields' => 'metafields',
+            'options' => 'productOptions',
+            'productType' => 'productType',
+            'redirectNewHandle' => 'redirectNewHandle',
+            'requiresSellingPlan' => 'requiresSellingPlan',
+            'seo' => 'seo',
+            'status' => 'status',
+            'tags' => 'tags',
+            'tempalteSuffix' => 'tempalteSuffix',
+            'title' => 'title',
+            'vendor' => 'vendor',
+        ];
+
+        foreach ($supportedKeysInProductInput as $key => $map) {
+            if (Arr::get($variables, $key)) {
+                $variables[$map] = $variables[$key];
+            }
+
+            unset($variables[$key]);
+        }
+
+        return $this;
+    }
+
     private function formatOptionsVariableForMutation(&$variables): self
     {
-        if ($options = Arr::get($variables, 'options')) {
-            unset($variables['options']);
-
+        if ($options = Arr::get($variables, 'productOptions')) {
             $options = is_array($options[0]) ? $options : [$options];
             $options = array_map(function ($option) {
                 $option['values'] = array_map(fn ($value) => ['name' => $value], $option['values']);
@@ -204,7 +239,16 @@ class Products extends Endpoint
 
     private function formatVariantsVariableForMutation(&$variables): self
     {
-        unset($variables['variants']);
+        $variables['variants'] = array_map(function ($variant) {
+            $variant['id'] = Util::toGid($variant['id'], 'ProductVariant');
+            if ($variant['fulfillmentServiceId']) {
+                $variant['inventoryItem'] = ['fulfillmentServiceId' => Util::toGid($variant['fulfillmentServiceId'], 'FulfillmentService')];
+                unset($variant['fulfillmentService']);
+                unset($variant['fulfillmentServiceId']);
+            }
+
+            return $variant;
+        }, $variables['variants']);
 
         return $this;
     }
