@@ -188,7 +188,7 @@ class FulfillmentOrders extends Endpoint
 
         $variables = [
             'id' => $this->dto->getResourceId('FulfillmentOrder'),
-            'message' => Arr::get($this->dto->payload, 'message', 'Fulfillment Request'),
+            'message' => Arr::get($this->dto->getPayload(), 'message', 'Fulfillment Request'),
             'notifyCustomer' => true,
         ];
 
@@ -218,7 +218,7 @@ class FulfillmentOrders extends Endpoint
 
         $variables = [
             'id' => $this->dto->getResourceId('FulfillmentOrder'),
-            'message' => Arr::get($this->dto->payload, 'message', 'Fulfillment Request'),
+            'message' => Arr::get($this->dto->getPayload(), 'message', 'Fulfillment Request'),
         ];
 
         $query = ArrayGraphQL::convert(
@@ -247,7 +247,7 @@ class FulfillmentOrders extends Endpoint
 
         $variables = [
             'id' => $this->dto->getResourceId('FulfillmentOrder'),
-            'message' => Arr::get($this->dto->payload, 'message', 'Fulfillment Request'),
+            'message' => Arr::get($this->dto->getPayload(), 'message', 'Fulfillment Request'),
         ];
 
         $query = ArrayGraphQL::convert(

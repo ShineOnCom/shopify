@@ -4,7 +4,6 @@ namespace Dan\Shopify\Helpers;
 
 use Dan\Shopify\ArrayGraphQL;
 use Dan\Shopify\Util;
-use Illuminate\Support\Arr;
 
 /**
  * Class FulfillmentServices.
@@ -75,7 +74,7 @@ class FulfillmentServices extends Endpoint
             return $this->updateMutation();
         }
 
-        $payload = Arr::get($this->dto->payload, 'fulfillment_service', []);
+        $payload = $this->dto->getPayload('fulfillment_service');
 
         $query = [
             'fulfillmentServiceCreate($INPUT)' => [
@@ -103,7 +102,7 @@ class FulfillmentServices extends Endpoint
 
     private function updateMutation(): array
     {
-        $payload = Arr::get($this->dto->payload, 'fulfillment_service', []);
+        $payload = $this->dto->getPayload('fulfillment_service');
 
         $query = [
             'fulfillmentServiceUpdate($INPUT)' => [
