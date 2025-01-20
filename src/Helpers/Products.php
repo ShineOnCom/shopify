@@ -106,7 +106,7 @@ class Products extends Endpoint
             ],
         ];
 
-        $limit = min(30, Arr::get($this->dto->payload, 'limit', 30));
+        $limit = min(30, Arr::get($this->dto->getPayload(), 'limit', 30));
 
         return [
             'query' => ArrayGraphQL::convert($fields, [
@@ -173,7 +173,8 @@ class Products extends Endpoint
     private function getVariables(): array
     {
         $variables = [];
-        $variables = Util::convertKeysToCamelCase(Arr::get($this->dto->payload, 'product'));
+
+        $variables = Util::convertKeysToCamelCase($this->dto->getPayload('product'));
         if ($this->dto->getResourceId()) {
             $variables['id'] = $this->dto->getResourceId('Product');
         }

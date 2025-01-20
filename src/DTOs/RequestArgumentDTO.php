@@ -3,15 +3,17 @@
 namespace Dan\Shopify\DTOs;
 
 use Dan\Shopify\Exceptions\InvalidGraphQLCallException;
+use Dan\Shopify\Models\AbstractModel;
 use Dan\Shopify\Util;
+use Illuminate\Support\Arr;
 
 final class RequestArgumentDTO
 {
     public function __construct(
         public readonly bool $mutate = false,
-        public $payload = null,
-        public readonly array $queue = [],
-        public readonly array $arguments = [],
+        private $payload = null,
+        private readonly array $queue = [],
+        private readonly array $arguments = [],
         public ?string $append = null
     ) {}
 
@@ -68,5 +70,15 @@ final class RequestArgumentDTO
         }
 
         return false;
+    }
+
+    public function getPayload($resource = null)
+    {
+        $payload = $this->payload instanceof AbstractModel ? $this->payload->toArray() : $this->payload;
+        if ($resource && Arr::get($payload, $resource)) {
+            return Arr::get($payload, $resource);
+        }
+
+        return $payload;
     }
 }

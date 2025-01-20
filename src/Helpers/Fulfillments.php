@@ -84,8 +84,7 @@ class Fulfillments extends Endpoint
 
     private function getMutation(): array
     {
-        $payload = $this->dto->payload;
-        $fulfillment = $payload['fulfillment'];
+        $fulfillment = $this->dto->getPayload('fulfillment');
 
         $query = [
             'fulfillmentCreateV2($INPUT)' => [
