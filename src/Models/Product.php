@@ -119,6 +119,7 @@ class Product extends AbstractModel
             $image['created_at'] = null;
             $image['updated_at'] = null;
             $image['published_scope'] = 'web';
+            $image['variant_ids'] = [];
 
             return $image;
         }, Arr::get($row, 'images', []));

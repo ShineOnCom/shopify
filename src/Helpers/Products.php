@@ -179,8 +179,8 @@ class Products extends Endpoint
         }
 
         $this
-            ->formatOptionsVariableForMutation($variables)
-            ->mapFields($variables);
+            ->mapFields($variables)
+            ->formatOptionsVariableForMutation($variables);
 
         return $variables;
     }
