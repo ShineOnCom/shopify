@@ -2,6 +2,9 @@
 
 namespace Dan\Shopify\Models;
 
+use Dan\Shopify\Util;
+use Illuminate\Support\Arr;
+
 /**
  * Class Variant.
  *
@@ -70,4 +73,42 @@ class Variant extends AbstractModel
         'requires_shipping' => 'bool',
         'metafields' => 'array',
     ];
+
+    public function transformGraphQLResponse(array $response): ?array
+    {
+        $response = Util::convertKeysToSnakeCase($response);
+
+        return self::format(Arr::get($response, 'data.node'));
+    }
+
+    public static function format(array $row)
+    {
+        if (blank($row)) {
+            return [];
+        }
+
+        $row['id'] = (int) $row['id'];
+        $row['admin_graphql_api_id'] = Util::toGid($row['id'], 'ProductVariant');
+        $row['product_id'] = null;
+
+        $location = collect(Arr::get($row, 'inventory_item.inventory_levels'))->first();
+
+        $row['fulfillment_service'] = Arr::get($location, 'location.fulfillment_service.handle');
+        $row['inventory_item_id'] = (int) Util::getIdFromGid(Arr::get($row, 'inventory_item.id'));
+        $row['inventory_management'] = null;
+        $row['grams'] = null;
+        $row['image_id'] = null;
+        $row['old_inventory_quantity'] = null;
+        $row['requires_shipping'] = Arr::get($row, 'inventory.requires_shipping');
+        $row['weight'] = Arr::get($row, 'inventory_item.measurement.weight.value');
+        $row['weight_unit'] = Arr::get($row, 'inventory_item.measurement.weight.unit');
+
+        $option_id = 1;
+        foreach (Arr::get($row, 'selected_options') as $option) {
+            $row["option{$option_id}"] = $option['value'];
+            $option_id++;
+        }
+
+        return $row;
+    }
 }

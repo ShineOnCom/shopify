@@ -3,19 +3,19 @@
 namespace Dan\Shopify\DTOs;
 
 use Dan\Shopify\Exceptions\InvalidGraphQLCallException;
+use Dan\Shopify\Models\AbstractModel;
 use Dan\Shopify\Util;
+use Illuminate\Support\Arr;
 
 final class RequestArgumentDTO
 {
     public function __construct(
         public readonly bool $mutate = false,
-        public $payload = null,
-        public readonly array $queue = [],
-        public readonly array $arguments = [],
+        private $payload = null,
+        private readonly array $queue = [],
+        private readonly array $arguments = [],
         public ?string $append = null
-    ) {
-
-    }
+    ) {}
 
     public function getResourceId(?string $graphQLResourceName = null)
     {
@@ -30,7 +30,7 @@ final class RequestArgumentDTO
     private function findResourceId()
     {
         if ($this->payload) {
-            if (is_string($this->payload)) {
+            if (is_string($this->payload) || is_int($this->payload)) {
                 return $this->payload;
             }
 
@@ -41,6 +41,10 @@ final class RequestArgumentDTO
 
         if (! empty($this->arguments)) {
             return $this->arguments[0];
+        }
+
+        if (! empty($this->queue) && filled($this->queue[0]) && $this->queue[0][1] === null) {
+            return $this->queue[0][0];
         }
 
         return null;
@@ -69,5 +73,15 @@ final class RequestArgumentDTO
         }
 
         return false;
+    }
+
+    public function getPayload($resource = null)
+    {
+        $payload = $this->payload instanceof AbstractModel ? $this->payload->toArray() : $this->payload;
+        if ($resource && Arr::get($payload, $resource)) {
+            return Arr::get($payload, $resource);
+        }
+
+        return $payload;
     }
 }

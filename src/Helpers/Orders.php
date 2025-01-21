@@ -292,7 +292,7 @@ class Orders extends Endpoint
 
     private function getOrders()
     {
-        $filters = sprintf('%s %s', $this->getFilters(), $this->getSortOrder());
+        $filters = $this->getFiltersAndSortOrder();
         $header = $filters ? 'orders($PER_PAGE, $FILTERS)' : 'orders($PER_PAGE)';
 
         $fields = [
@@ -304,7 +304,7 @@ class Orders extends Endpoint
             ],
         ];
 
-        $limit = Arr::get($this->dto->payload, 'limit', 50);
+        $limit = Arr::get($this->dto->getPayload(), 'limit', 50);
 
         return [
             'query' => ArrayGraphQL::convert($fields, [
@@ -359,7 +359,7 @@ class Orders extends Endpoint
             ],
         ];
 
-        $variables = Util::convertKeysToCamelCase(Arr::get($this->dto->payload, 'order'));
+        $variables = Util::convertKeysToCamelCase($this->dto->getPayload('order'));
         $variables['id'] = $this->dto->getResourceId('Order');
 
         return [

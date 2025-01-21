@@ -399,13 +399,13 @@ class Shopify
             }
 
             $this->cursors = Util::convertKeysToSnakeCase(collect(Arr::get($response, 'data'))->pluck('pageInfo')->first() ?? []);
-            $response = (new static::$resource_models[$this->api]())->transformGraphQLResponse($response);
+            $response = (new static::$resource_models[$this->api])->transformGraphQLResponse($response);
             static::log('log_api_response_data', $response);
 
             return $response;
         }
 
-        throw new GraphQLEnabledWithMissingQueriesException();
+        throw new GraphQLEnabledWithMissingQueriesException;
     }
 
     /**

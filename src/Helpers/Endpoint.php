@@ -135,9 +135,7 @@ abstract class Endpoint
      *
      * @throws GraphQLEnabledWithMissingQueriesException
      */
-    public function ensureGraphQLSupport(): void
-    {
-    }
+    public function ensureGraphQLSupport(): void {}
 
     /**
      * @return array{query: string, variables: array}
@@ -159,26 +157,26 @@ abstract class Endpoint
 
     protected function getFilters()
     {
-        if (! $this->dto->payload) {
+        if (! $this->dto->getPayload()) {
             return null;
         }
 
         $cursor = '';
-        if ($page_info = Arr::get($this->dto->payload, 'page_info')) {
+        if ($page_info = Arr::get($this->dto->getPayload(), 'page_info')) {
             $cursor = sprintf('after: "%s"', Arr::get($page_info, 'end_cursor'));
         }
 
         $filters = collect([]);
-        if ($ids = Arr::get($this->dto->payload, 'ids')) {
+        if ($ids = Arr::get($this->dto->getPayload(), 'ids')) {
             $ids = collect(explode(',', $ids))->map(fn ($id) => sprintf('(id:%s)', $id));
             $filters = $filters->merge($ids);
         }
 
-        if ($name = Arr::get($this->dto->payload, 'name')) {
+        if ($name = Arr::get($this->dto->getPayload(), 'name')) {
             $filters = $filters->merge([sprintf("(name:'%s')", $name)]);
         }
 
-        if ($created_at_min = Arr::get($this->dto->payload, 'created_at_min')) {
+        if ($created_at_min = Arr::get($this->dto->getPayload(), 'created_at_min')) {
             $filters = $filters->merge([sprintf("(created_at:>='%s')", $created_at_min)]);
         }
 
@@ -187,7 +185,7 @@ abstract class Endpoint
 
     protected function getSortOrder()
     {
-        $order = Arr::get($this->dto->payload, 'order');
+        $order = Arr::get($this->dto->getPayload(), 'order');
         if (blank($order)) {
             return '';
         }
@@ -202,5 +200,10 @@ abstract class Endpoint
         }
 
         return sprintf('sortKey: %s, reverse: %s', $field, $reverse);
+    }
+
+    protected function getFiltersAndSortOrder(): string
+    {
+        return sprintf('%s %s', $this->getFilters(), $this->getSortOrder());
     }
 }
