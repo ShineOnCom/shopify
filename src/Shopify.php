@@ -384,7 +384,7 @@ class Shopify
     /**
      * @throws GraphQLEnabledWithMissingQueriesException
      */
-    private function withGraphQL($payload = null, ?string $append = null, bool $mutate = false): ?array
+    public function withGraphQL($payload = null, ?string $append = null, bool $mutate = false): ?array
     {
         if ($this->graphQLEnabled()) {
             $dto = new RequestArgumentDTO($mutate, $payload, $this->queue, $this->ids, $append);
@@ -401,6 +401,11 @@ class Shopify
             $this->cursors = Util::convertKeysToSnakeCase(collect(Arr::get($response, 'data'))->pluck('pageInfo')->first() ?? []);
             $response = (new static::$resource_models[$this->api])->transformGraphQLResponse($response);
             static::log('log_api_response_data', $response);
+
+            if (isset($queryAndVariables['hasCallback'])) {
+                $callbackResponse = $this->{$this->api}->handleCallback($this, $dto, $response);
+                $response = array_merge($response, $callbackResponse);
+            }
 
             return $response;
         }

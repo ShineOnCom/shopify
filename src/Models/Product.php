@@ -96,7 +96,7 @@ class Product extends AbstractModel
             return collect($products)->map(fn ($row) => $this->format($row))->values()->all();
         }
 
-        $product = Arr::get($response, 'data.product') ?? Arr::get($response, 'data.product_update.product');
+        $product = Arr::get($response, 'data.product') ?? Arr::get($response, 'data.product_update.product') ?? Arr::get($response, 'data.product_create.product');
 
         return $this->format($product);
     }

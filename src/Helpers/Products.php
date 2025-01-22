@@ -3,6 +3,8 @@
 namespace Dan\Shopify\Helpers;
 
 use Dan\Shopify\ArrayGraphQL;
+use Dan\Shopify\DTOs\RequestArgumentDTO;
+use Dan\Shopify\Shopify;
 use Dan\Shopify\Util;
 use Illuminate\Support\Arr;
 
@@ -19,6 +21,17 @@ class Products extends Endpoint
     public function makeGraphQLQuery(): array
     {
         return $this->dto->mutate ? $this->getMutation() : $this->getQuery();
+    }
+
+    public function handleCallback(Shopify $shopify, RequestArgumentDTO $dto, array $response): array
+    {
+        $shopify->api = 'variants';
+        $shopify->ids = [$response['id']];
+        $payload = Arr::get($dto->getPayload('product'), 'variants');
+
+        $variantsResponse = $shopify->withGraphQL($payload, null, true);
+
+        return ['variants' => $variantsResponse];
     }
 
     private function getFields()
@@ -144,7 +157,6 @@ class Products extends Endpoint
     private function saveMutation(): array
     {
         $header = $this->dto->getResourceId() ? 'productUpdate($PRODUCT_INPUT)' : 'productCreate($PRODUCT_INPUT)';
-
         $query = [
             $header => [
                 'product' => $this->getFields(),
@@ -167,6 +179,7 @@ class Products extends Endpoint
             'variables' => [
                 'input' => $this->getVariables(),
             ],
+            'hasCallback' => true,
         ];
     }
 
@@ -181,7 +194,9 @@ class Products extends Endpoint
 
         $this
             ->mapFields($variables)
-            ->formatOptionsVariableForMutation($variables);
+            ->formatOptionsVariableForMutation($variables)
+            ->formatStatusVariableForMutation($variables)
+            ->formatPublishAtVariableForMutation($variables);
 
         return $variables;
     }
@@ -211,12 +226,15 @@ class Products extends Endpoint
             'vendor' => 'vendor',
         ];
 
+        $variables = Arr::only($variables, array_keys($supportedKeysInProductInput));
         foreach ($supportedKeysInProductInput as $key => $map) {
-            if (Arr::get($variables, $key)) {
+            if (isset($variables[$key])) {
                 $variables[$map] = $variables[$key];
             }
 
-            unset($variables[$key]);
+            if ($key !== $map) {
+                unset($variables[$key]);
+            }
         }
 
         return $this;
@@ -238,18 +256,24 @@ class Products extends Endpoint
         return $this;
     }
 
-    private function formatVariantsVariableForMutation(&$variables): self
+    private function formatStatusVariableForMutation(&$variables): self
     {
-        $variables['variants'] = array_map(function ($variant) {
-            $variant['id'] = Util::toGid($variant['id'], 'ProductVariant');
-            if ($variant['fulfillmentServiceId']) {
-                $variant['inventoryItem'] = ['fulfillmentServiceId' => Util::toGid($variant['fulfillmentServiceId'], 'FulfillmentService')];
-                unset($variant['fulfillmentService']);
-                unset($variant['fulfillmentServiceId']);
-            }
+        if (Arr::get($variables, 'publishedScope') === 'global') {
+            $variables['status'] = 'ACTIVE';
 
-            return $variant;
-        }, $variables['variants']);
+            unset($variables['publishedScope']);
+        }
+
+        return $this;
+    }
+
+    private function formatPublishAtVariableForMutation(&$variables): self
+    {
+        if ($publishedAt = Arr::get($variables, 'publishedAt')) {
+            $variables['publishable'] = ['publishAt' => $publishedAt];
+
+            unset($variables['publishedAt']);
+        }
 
         return $this;
     }

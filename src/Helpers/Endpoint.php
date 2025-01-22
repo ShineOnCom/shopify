@@ -145,6 +145,11 @@ abstract class Endpoint
         throw new GraphQLEnabledWithMissingQueriesException('Please override makeGraphQLQuery in child class');
     }
 
+    public function handleCallback(Shopify $shopify, RequestArgumentDTO $dto, array $response): array
+    {
+        throw new GraphQLEnabledWithMissingQueriesException('Callback not supported');
+    }
+
     protected function getPageInfoFields()
     {
         return [
