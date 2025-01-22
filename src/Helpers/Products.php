@@ -26,9 +26,9 @@ class Products extends Endpoint
     public function handleCallback(Shopify $shopify, RequestArgumentDTO $dto, array $response): array
     {
         $shopify->api = 'variants';
-        $shopify->ids = [$response['id']];
-        $payload = Arr::get($dto->getPayload('product'), 'variants');
+        $shopify->queue[] = ['products', $response['id']];
 
+        $payload = Arr::get($dto->getPayload('product'), 'variants');
         $variantsResponse = $shopify->withGraphQL($payload, null, true);
 
         return ['variants' => $variantsResponse];

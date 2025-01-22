@@ -98,6 +98,54 @@ class Variants extends Endpoint
 
     private function getMutation(): array
     {
+        if ($this->dto->hasResourceInQueue('products')) {
+            return $this->getMutationForProduct();
+        }
+
         throw new GraphQLEnabledWithMissingQueriesException('Mutation not supported directly. Please use products');
+    }
+
+    private function getMutationForProduct()
+    {
+        $query = [
+            'productVariantsBulkCreate($INPUT)' => [
+                'product' => [
+                    'id',
+                ],
+                'productVariants' => [
+                    'id',
+                ],
+                'userErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        return [
+            'query' => ArrayGraphQL::convert(
+                $query,
+                ['$INPUT' => 'productId: $productId, variants: $variants'],
+                'mutation SaveVariants($productId: ID!, $variants: [ProductVariantsBulkInput!]!)'
+            ),
+            'variables' => [
+                'productId' => Util::toGid($this->dto->findResourceIdInQueue('products'), 'Product'),
+                'variants' => $this->formatPayload(),
+            ],
+        ];
+    }
+
+    private function formatPayload(): array
+    {
+        return array_map(function ($variant) {
+            $variant['id'] = Util::toGid($variant['id'], 'ProductVariant');
+            if ($variant['fulfillmentServiceId']) {
+                $variant['inventoryItem'] = ['fulfillmentServiceId' => Util::toGid($variant['fulfillmentServiceId'], 'FulfillmentService')];
+                unset($variant['fulfillmentService']);
+                unset($variant['fulfillmentServiceId']);
+            }
+
+            return $variant;
+        }, $this->dto->getPayload('variants'));
     }
 }
