@@ -203,7 +203,7 @@ class Products extends Endpoint
 
     private function mapFields(&$variables): self
     {
-        $supportedKeysInProductInput = [
+        $variables = Util::mapFieldsForVariable([
             'category' => 'category',
             'claimOwnership' => 'claimOwnership',
             'collectionsToJoin' => 'collectionsToJoin',
@@ -221,21 +221,10 @@ class Products extends Endpoint
             'seo' => 'seo',
             'status' => 'status',
             'tags' => 'tags',
-            'tempalteSuffix' => 'tempalteSuffix',
+            'templateSuffix' => 'templateSuffix',
             'title' => 'title',
             'vendor' => 'vendor',
-        ];
-
-        $variables = Arr::only($variables, array_keys($supportedKeysInProductInput));
-        foreach ($supportedKeysInProductInput as $key => $map) {
-            if (isset($variables[$key])) {
-                $variables[$map] = $variables[$key];
-            }
-
-            if ($key !== $map) {
-                unset($variables[$key]);
-            }
-        }
+        ], $variables);
 
         return $this;
     }

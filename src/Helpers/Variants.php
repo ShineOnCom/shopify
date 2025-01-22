@@ -128,24 +128,57 @@ class Variants extends Endpoint
                 ['$INPUT' => 'productId: $productId, variants: $variants'],
                 'mutation SaveVariants($productId: ID!, $variants: [ProductVariantsBulkInput!]!)'
             ),
-            'variables' => [
-                'productId' => Util::toGid($this->dto->findResourceIdInQueue('products'), 'Product'),
-                'variants' => $this->formatPayload(),
-            ],
+            'variables' => $this->getVariables(),
         ];
     }
 
-    private function formatPayload(): array
+    private function getVariables(): array
     {
-        return array_map(function ($variant) {
-            $variant['id'] = Util::toGid($variant['id'], 'ProductVariant');
-            if ($variant['fulfillmentServiceId']) {
-                $variant['inventoryItem'] = ['fulfillmentServiceId' => Util::toGid($variant['fulfillmentServiceId'], 'FulfillmentService')];
-                unset($variant['fulfillmentService']);
-                unset($variant['fulfillmentServiceId']);
-            }
+        $variants = $this->dto->getPayload('variant');
+        $variants = array_map(function ($variant) {
+            $this
+                ->formatFulfillmentServiceVariableForMutation($variant)
+                ->mapFields($variant);
 
             return $variant;
-        }, $this->dto->getPayload('variants'));
+        }, $variants);
+
+        return [
+            'productId' => Util::toGid($this->dto->findResourceIdInQueue('products'), 'Product'),
+            'variants' => $variants,
+        ];
+    }
+
+    private function mapFields(&$variant): self
+    {
+        $variant = Util::mapFieldsForVariable([
+            'id' => 'id',
+            'barcode' => 'barcode',
+            'compareAtPrice' => 'compareAtPrice',
+            'inventoryItem' => 'inventoryItem',
+            'inventoryPolicy' => 'inventoryPolicy',
+            'inventoryQuantities' => 'inventoryQuantities',
+            'mediaId' => 'mediaId',
+            'mediaSrc' => 'mediaSrc',
+            'metafields' => 'metafields',
+            'optionValues' => 'optionValues',
+            'price' => 'price',
+            'requiresComponents' => 'requiresComponents',
+            'taxable' => 'taxable',
+            'taxCode' => 'taxCode',
+        ], $variant);
+
+        return $this;
+    }
+
+    private function formatFulfillmentServiceVariableForMutation(&$variant): self
+    {
+        if ($variant['fulfillmentServiceId']) {
+            $variant['inventoryItem'] = [
+                'fulfillmentServiceId' => Util::toGid($variant['fulfillmentServiceId'], 'FulfillmentService'),
+            ];
+        }
+
+        return $this;
     }
 }

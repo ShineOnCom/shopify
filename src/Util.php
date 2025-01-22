@@ -371,4 +371,20 @@ class Util
             return [$camelCase => $value];
         })->toArray();
     }
+
+    public static function mapFieldsForVariable(array $supportedKeys, array $variables): array
+    {
+        $variables = Arr::only($variables, array_keys($supportedKeys));
+        foreach ($supportedKeys as $key => $map) {
+            if (isset($variables[$key])) {
+                $variables[$map] = $variables[$key];
+            }
+
+            if ($key !== $map) {
+                unset($variables[$key]);
+            }
+        }
+
+        return $variables;
+    }
 }
