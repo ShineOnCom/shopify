@@ -108,7 +108,7 @@ class Variant extends AbstractModel
         $row['weight_unit'] = Arr::get($row, 'inventory_item.measurement.weight.unit');
 
         $option_id = 1;
-        foreach (Arr::get($row, 'selected_options') as $option) {
+        foreach (Arr::get($row, 'selected_options', []) as $option) {
             $row["option{$option_id}"] = $option['value'];
             $option_id++;
         }
