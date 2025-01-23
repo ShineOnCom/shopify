@@ -23,6 +23,7 @@ use Dan\Shopify\Models\Metafield;
 use Dan\Shopify\Models\Order;
 use Dan\Shopify\Models\PriceRule;
 use Dan\Shopify\Models\Product;
+use Dan\Shopify\Models\Publication;
 use Dan\Shopify\Models\RecurringApplicationCharge;
 use Dan\Shopify\Models\Risk;
 use Dan\Shopify\Models\SmartCollections;
@@ -233,6 +234,7 @@ class Shopify
         'themes' => 'themes/%s.json',
         'variants' => 'variants/%s.json',
         'webhooks' => 'webhooks/%s.json',
+        'publications' => 'publications/%s.json',
     ];
 
     /** @var array */
@@ -256,6 +258,7 @@ class Shopify
         'themes' => Theme::class,
         'variants' => Variant::class,
         'webhooks' => Webhook::class,
+        'publications' => Publication::class,
     ];
 
     /** @var array */
