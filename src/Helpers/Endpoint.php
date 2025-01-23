@@ -211,4 +211,20 @@ abstract class Endpoint
     {
         return sprintf('%s %s', $this->getFilters(), $this->getSortOrder());
     }
+
+    protected function graphQL(
+        Shopify $shopify,
+        ?string $resource = null,
+        $payload = null,
+        ?string $append = null,
+        bool $mutate = false,
+        array $appendToQueue = []
+    ) {
+        $shopify->api = $resource;
+        if (filled($appendToQueue)) {
+            $shopify->queue[] = $appendToQueue;
+        }
+
+        return $shopify->withGraphQL($payload, $append, $mutate);
+    }
 }

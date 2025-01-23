@@ -4,6 +4,7 @@ namespace Dan\Shopify\Helpers;
 
 use Dan\Shopify\ArrayGraphQL;
 use Dan\Shopify\DTOs\RequestArgumentDTO;
+use Dan\Shopify\Exceptions\GraphQLRequestException;
 use Dan\Shopify\Shopify;
 use Dan\Shopify\Util;
 use Illuminate\Support\Arr;
@@ -25,13 +26,25 @@ class Products extends Endpoint
 
     public function handleCallback(Shopify $shopify, RequestArgumentDTO $dto, array $response): array
     {
-        $shopify->api = 'variants';
-        $shopify->queue[] = ['products', $response['id']];
+        $variantsResponse = $this->graphQL(
+            $shopify,
+            'variants',
+            Arr::get($dto->getPayload('product'), 'variants'),
+            null,
+            true,
+            ['products', $response['id']]
+        );
 
-        $payload = Arr::get($dto->getPayload('product'), 'variants');
-        $variantsResponse = $shopify->withGraphQL($payload, null, true);
+        $publishResponse = $this->graphQL(
+            $shopify,
+            'products',
+            [],
+            null,
+            true,
+            ['publish', $response['id']]
+        );
 
-        return ['variants' => $variantsResponse];
+        return ['variants' => $variantsResponse, 'publish' => $publishResponse];
     }
 
     private function getFields()
@@ -151,6 +164,10 @@ class Products extends Endpoint
             return $this->deleteMutation();
         }
 
+        if ($this->dto->hasResourceInQueue('publish')) {
+            return $this->publishMutation();
+        }
+
         return $this->saveMutation();
     }
 
@@ -193,10 +210,9 @@ class Products extends Endpoint
         }
 
         $this
-            ->mapFields($variables)
             ->formatOptionsVariableForMutation($variables)
             ->formatStatusVariableForMutation($variables)
-            ->formatPublishAtVariableForMutation($variables);
+            ->mapFields($variables);
 
         return $variables;
     }
@@ -231,7 +247,7 @@ class Products extends Endpoint
 
     private function formatOptionsVariableForMutation(&$variables): self
     {
-        if ($options = Arr::get($variables, 'productOptions')) {
+        if ($options = Arr::get($variables, 'options')) {
             $options = is_array($options[0]) ? $options : [$options];
             $options = array_map(function ($option) {
                 $option['values'] = array_map(fn ($value) => ['name' => $value], $option['values']);
@@ -239,7 +255,7 @@ class Products extends Endpoint
                 return $option;
             }, $options);
 
-            $variables['productOptions'] = $options;
+            $variables['options'] = $options;
         }
 
         return $this;
@@ -247,22 +263,7 @@ class Products extends Endpoint
 
     private function formatStatusVariableForMutation(&$variables): self
     {
-        if (Arr::get($variables, 'publishedScope') === 'global') {
-            $variables['status'] = 'ACTIVE';
-
-            unset($variables['publishedScope']);
-        }
-
-        return $this;
-    }
-
-    private function formatPublishAtVariableForMutation(&$variables): self
-    {
-        if ($publishedAt = Arr::get($variables, 'publishedAt')) {
-            $variables['publishable'] = ['publishAt' => $publishedAt];
-
-            unset($variables['publishedAt']);
-        }
+        $variables['status'] = 'ACTIVE';
 
         return $this;
     }
@@ -287,6 +288,37 @@ class Products extends Endpoint
             ),
             'variables' => [
                 'id' => $this->dto->getResourceId('Product'),
+            ],
+        ];
+    }
+
+    private function publishMutation(): array
+    {
+        $query = [
+            'publishablePublish($INPUT)' => [
+                'userErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        $publications = $this->graphQL($this->dto->shopify, 'publications');
+        if (empty($publications)) {
+            throw new GraphQLRequestException('No publications available for Store');
+        }
+
+        $publication = $publications[0];
+
+        return [
+            'query' => ArrayGraphQL::convert(
+                $query,
+                ['$INPUT' => 'id: $id, input: {publicationId: $publicationId}'],
+                'mutation PublishProduct($id: ID!, $publicationId: ID!)'
+            ),
+            'variables' => [
+                'id' => Util::toGid($this->dto->findResourceIdInQueue('products'), 'Product'),
+                'publicationId' => Util::toGid(Arr::get($publication, 'id'), 'Publication'),
             ],
         ];
     }

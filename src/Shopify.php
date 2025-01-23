@@ -390,7 +390,7 @@ class Shopify
     public function withGraphQL($payload = null, ?string $append = null, bool $mutate = false): ?array
     {
         if ($this->graphQLEnabled()) {
-            $dto = new RequestArgumentDTO($mutate, $payload, $this->queue, $this->ids, $append);
+            $dto = new RequestArgumentDTO($this, $mutate, $payload, $this->queue, $this->ids, $append);
             $queryAndVariables = $this->{$this->api}->setRequestArgumentDTO($dto)->makeGraphQLQuery();
 
             $response = $this->graphql($queryAndVariables['query'], $queryAndVariables['variables']);
