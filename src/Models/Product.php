@@ -132,7 +132,7 @@ class Product extends AbstractModel
         }, Arr::get($row, 'options', []));
 
         $variants = array_map(function ($variant) use ($product_id) {
-            $variant = Variant::format($variant);
+            $variant = Variant::format($variant, $product_id);
             $variant['product_id'] = $product_id;
 
             return $variant;

@@ -313,12 +313,13 @@ class Products extends Endpoint
         return [
             'query' => ArrayGraphQL::convert(
                 $query,
-                ['$INPUT' => 'id: $id, input: {publicationId: $publicationId}'],
-                'mutation PublishProduct($id: ID!, $publicationId: ID!)'
+                ['$INPUT' => 'id: $id, input: {publicationId: $publicationId, publishDate: $publishDate}'],
+                'mutation PublishProduct($id: ID!, $publicationId: ID!, $publishDate: DateTime!)'
             ),
             'variables' => [
                 'id' => Util::toGid($this->dto->findResourceIdInQueue('products'), 'Product'),
                 'publicationId' => Util::toGid(Arr::get($publication, 'id'), 'Publication'),
+                'publishDate' => now()->toIso8601String(),
             ],
         ];
     }
