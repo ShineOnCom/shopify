@@ -85,7 +85,7 @@ class Variant extends AbstractModel
         return self::format(Arr::get($response, 'data.node'));
     }
 
-    public static function format(array $row)
+    public static function format(array $row, int $product_id = 0)
     {
         if (blank($row)) {
             return [];
@@ -93,16 +93,23 @@ class Variant extends AbstractModel
 
         $row['id'] = (int) $row['id'];
         $row['admin_graphql_api_id'] = Util::toGid($row['id'], 'ProductVariant');
-        $row['product_id'] = null;
+        $row['product_id'] = $product_id;
 
         $location = collect(Arr::get($row, 'inventory_item.inventory_levels'))->first();
 
         $row['fulfillment_service'] = Arr::get($location, 'location.fulfillment_service.handle');
         $row['inventory_item_id'] = (int) Util::getIdFromGid(Arr::get($row, 'inventory_item.id'));
         $row['inventory_management'] = null;
-        $row['grams'] = null;
+        $row['grams'] = 0;
         $row['image_id'] = null;
         $row['old_inventory_quantity'] = null;
+        $row['barcode'] = null;
+        $row['compare_at_price'] = null;
+        $row['created_at'] = null;
+        $row['fulfillment_service'] = null;
+        $row['inventory_policy'] = null;
+        $row['inventory_quantity'] = null;
+
         $row['requires_shipping'] = Arr::get($row, 'inventory.requires_shipping');
         $row['weight'] = Arr::get($row, 'inventory_item.measurement.weight.value');
         $row['weight_unit'] = Arr::get($row, 'inventory_item.measurement.weight.unit');
@@ -112,6 +119,10 @@ class Variant extends AbstractModel
             $row["option{$option_id}"] = $option['value'];
             $option_id++;
         }
+
+        $row['option1'] = Arr::get($row, 'option1');
+        $row['option2'] = Arr::get($row, 'option2');
+        $row['option3'] = Arr::get($row, 'option3');
 
         return $row;
     }
