@@ -5,6 +5,7 @@ namespace Dan\Shopify\Helpers;
 use Dan\Shopify\ArrayGraphQL;
 use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
 use Dan\Shopify\Util;
+use Illuminate\Support\Arr;
 
 /**
  * Class Variants.
@@ -137,11 +138,12 @@ class Variants extends Endpoint
         $variants = $this->dto->getPayload('variant');
         $variants = array_map(function ($variant) {
             $this
-                ->formatFulfillmentServiceVariableForMutation($variant)
+                ->formatInventoryItemVariableForMutation($variant)
+                ->formatOptionValuesVariableForMutation($variant)
                 ->mapFields($variant);
 
             return $variant;
-        }, $variants);
+        }, Util::convertKeysToCamelCase($variants));
 
         return [
             'productId' => Util::toGid($this->dto->findResourceIdInQueue('products'), 'Product'),
@@ -171,13 +173,55 @@ class Variants extends Endpoint
         return $this;
     }
 
-    private function formatFulfillmentServiceVariableForMutation(&$variant): self
+    private function formatOptionValuesVariableForMutation(&$variant): self
     {
-        if ($variant['fulfillmentServiceId']) {
-            $variant['inventoryItem'] = [
-                'fulfillmentServiceId' => Util::toGid($variant['fulfillmentServiceId'], 'FulfillmentService'),
+        $optionValues = [];
+        foreach ([1, 2, 3] as $option) {
+            $nameKey = "option{$option}Name";
+            $valueKey = "option{$option}";
+
+            if ($value = Arr::get($variant, $valueKey)) {
+                $optionValues[] = [
+                    'optionName' => $variant[$nameKey],
+                    'name' => $value,
+                ];
+            }
+        }
+
+        if (filled($optionValues)) {
+            $variant['optionValues'] = $optionValues;
+        } else {
+            $variant['optionValues'] = [
+                ['optionName' => 'Title', 'name' => Arr::get($variant, 'title', 'Default Title')],
             ];
         }
+
+        return $this;
+    }
+
+    private function formatInventoryItemVariableForMutation(&$variant): self
+    {
+        $inventoryItem = ['tracked' => false];
+
+        if (isset($variant['requiresShipping'])) {
+            $inventoryItem['requiresShipping'] = $variant['requiresShipping'];
+        }
+
+        if (isset($variant['locationId'])) {
+            $variant['inventoryQuantities'] = [
+                ['availableQuantity' => 1000000, 'locationId' => Util::toGid($variant['locationId'], 'Location')],
+            ];
+        }
+
+        if (isset($variant['sku'])) {
+            $inventoryItem['sku'] = $variant['sku'];
+        }
+
+        if (isset($variant['cost'])) {
+            $inventoryItem['cost'] = $variant['cost'];
+        }
+
+        $variant['inventoryItem'] = $inventoryItem;
 
         return $this;
     }

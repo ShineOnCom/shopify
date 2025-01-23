@@ -78,6 +78,10 @@ class Variant extends AbstractModel
     {
         $response = Util::convertKeysToSnakeCase($response);
 
+        if ($variants = Arr::get($response, 'data.product_variants_bulk_create.product_variants')) {
+            return array_map(fn ($row) => $this->format($row), $variants);
+        }
+
         return self::format(Arr::get($response, 'data.node'));
     }
 
