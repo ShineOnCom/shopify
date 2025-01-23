@@ -23,6 +23,7 @@ use Dan\Shopify\Models\Metafield;
 use Dan\Shopify\Models\Order;
 use Dan\Shopify\Models\PriceRule;
 use Dan\Shopify\Models\Product;
+use Dan\Shopify\Models\Publication;
 use Dan\Shopify\Models\RecurringApplicationCharge;
 use Dan\Shopify\Models\Risk;
 use Dan\Shopify\Models\SmartCollections;
@@ -233,6 +234,7 @@ class Shopify
         'themes' => 'themes/%s.json',
         'variants' => 'variants/%s.json',
         'webhooks' => 'webhooks/%s.json',
+        'publications' => 'publications/%s.json',
     ];
 
     /** @var array */
@@ -256,6 +258,7 @@ class Shopify
         'themes' => Theme::class,
         'variants' => Variant::class,
         'webhooks' => Webhook::class,
+        'publications' => Publication::class,
     ];
 
     /** @var array */
@@ -384,10 +387,10 @@ class Shopify
     /**
      * @throws GraphQLEnabledWithMissingQueriesException
      */
-    private function withGraphQL($payload = null, ?string $append = null, bool $mutate = false): ?array
+    public function withGraphQL($payload = null, ?string $append = null, bool $mutate = false): ?array
     {
         if ($this->graphQLEnabled()) {
-            $dto = new RequestArgumentDTO($mutate, $payload, $this->queue, $this->ids, $append);
+            $dto = new RequestArgumentDTO($this, $mutate, $payload, $this->queue, $this->ids, $append);
             $queryAndVariables = $this->{$this->api}->setRequestArgumentDTO($dto)->makeGraphQLQuery();
 
             $response = $this->graphql($queryAndVariables['query'], $queryAndVariables['variables']);
@@ -401,6 +404,11 @@ class Shopify
             $this->cursors = Util::convertKeysToSnakeCase(collect(Arr::get($response, 'data'))->pluck('pageInfo')->first() ?? []);
             $response = (new static::$resource_models[$this->api])->transformGraphQLResponse($response);
             static::log('log_api_response_data', $response);
+
+            if (isset($queryAndVariables['hasCallback'])) {
+                $callbackResponse = $this->{$this->api}->handleCallback($this, $dto, $response);
+                $response = array_merge($response, $callbackResponse);
+            }
 
             return $response;
         }

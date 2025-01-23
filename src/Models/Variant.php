@@ -78,6 +78,10 @@ class Variant extends AbstractModel
     {
         $response = Util::convertKeysToSnakeCase($response);
 
+        if ($variants = Arr::get($response, 'data.product_variants_bulk_create.product_variants')) {
+            return array_map(fn ($row) => $this->format($row), $variants);
+        }
+
         return self::format(Arr::get($response, 'data.node'));
     }
 
@@ -104,7 +108,7 @@ class Variant extends AbstractModel
         $row['weight_unit'] = Arr::get($row, 'inventory_item.measurement.weight.unit');
 
         $option_id = 1;
-        foreach (Arr::get($row, 'selected_options') as $option) {
+        foreach (Arr::get($row, 'selected_options', []) as $option) {
             $row["option{$option_id}"] = $option['value'];
             $option_id++;
         }

@@ -3,6 +3,9 @@
 namespace Dan\Shopify\Helpers;
 
 use Dan\Shopify\ArrayGraphQL;
+use Dan\Shopify\DTOs\RequestArgumentDTO;
+use Dan\Shopify\Exceptions\GraphQLRequestException;
+use Dan\Shopify\Shopify;
 use Dan\Shopify\Util;
 use Illuminate\Support\Arr;
 
@@ -19,6 +22,29 @@ class Products extends Endpoint
     public function makeGraphQLQuery(): array
     {
         return $this->dto->mutate ? $this->getMutation() : $this->getQuery();
+    }
+
+    public function handleCallback(Shopify $shopify, RequestArgumentDTO $dto, array $response): array
+    {
+        $variantsResponse = $this->graphQL(
+            $shopify,
+            'variants',
+            Arr::get($dto->getPayload('product'), 'variants'),
+            null,
+            true,
+            ['products', $response['id']]
+        );
+
+        $publishResponse = $this->graphQL(
+            $shopify,
+            'products',
+            [],
+            null,
+            true,
+            ['publish', $response['id']]
+        );
+
+        return ['variants' => $variantsResponse, 'publish' => $publishResponse];
     }
 
     private function getFields()
@@ -138,13 +164,16 @@ class Products extends Endpoint
             return $this->deleteMutation();
         }
 
+        if ($this->dto->hasResourceInQueue('publish')) {
+            return $this->publishMutation();
+        }
+
         return $this->saveMutation();
     }
 
     private function saveMutation(): array
     {
         $header = $this->dto->getResourceId() ? 'productUpdate($PRODUCT_INPUT)' : 'productCreate($PRODUCT_INPUT)';
-
         $query = [
             $header => [
                 'product' => $this->getFields(),
@@ -167,6 +196,7 @@ class Products extends Endpoint
             'variables' => [
                 'input' => $this->getVariables(),
             ],
+            'hasCallback' => true,
         ];
     }
 
@@ -180,15 +210,16 @@ class Products extends Endpoint
         }
 
         $this
-            ->mapFields($variables)
-            ->formatOptionsVariableForMutation($variables);
+            ->formatOptionsVariableForMutation($variables)
+            ->formatStatusVariableForMutation($variables)
+            ->mapFields($variables);
 
         return $variables;
     }
 
     private function mapFields(&$variables): self
     {
-        $supportedKeysInProductInput = [
+        $variables = Util::mapFieldsForVariable([
             'category' => 'category',
             'claimOwnership' => 'claimOwnership',
             'collectionsToJoin' => 'collectionsToJoin',
@@ -206,25 +237,17 @@ class Products extends Endpoint
             'seo' => 'seo',
             'status' => 'status',
             'tags' => 'tags',
-            'tempalteSuffix' => 'tempalteSuffix',
+            'templateSuffix' => 'templateSuffix',
             'title' => 'title',
             'vendor' => 'vendor',
-        ];
-
-        foreach ($supportedKeysInProductInput as $key => $map) {
-            if (Arr::get($variables, $key)) {
-                $variables[$map] = $variables[$key];
-            }
-
-            unset($variables[$key]);
-        }
+        ], $variables);
 
         return $this;
     }
 
     private function formatOptionsVariableForMutation(&$variables): self
     {
-        if ($options = Arr::get($variables, 'productOptions')) {
+        if ($options = Arr::get($variables, 'options')) {
             $options = is_array($options[0]) ? $options : [$options];
             $options = array_map(function ($option) {
                 $option['values'] = array_map(fn ($value) => ['name' => $value], $option['values']);
@@ -232,24 +255,15 @@ class Products extends Endpoint
                 return $option;
             }, $options);
 
-            $variables['productOptions'] = $options;
+            $variables['options'] = $options;
         }
 
         return $this;
     }
 
-    private function formatVariantsVariableForMutation(&$variables): self
+    private function formatStatusVariableForMutation(&$variables): self
     {
-        $variables['variants'] = array_map(function ($variant) {
-            $variant['id'] = Util::toGid($variant['id'], 'ProductVariant');
-            if ($variant['fulfillmentServiceId']) {
-                $variant['inventoryItem'] = ['fulfillmentServiceId' => Util::toGid($variant['fulfillmentServiceId'], 'FulfillmentService')];
-                unset($variant['fulfillmentService']);
-                unset($variant['fulfillmentServiceId']);
-            }
-
-            return $variant;
-        }, $variables['variants']);
+        $variables['status'] = 'ACTIVE';
 
         return $this;
     }
@@ -274,6 +288,37 @@ class Products extends Endpoint
             ),
             'variables' => [
                 'id' => $this->dto->getResourceId('Product'),
+            ],
+        ];
+    }
+
+    private function publishMutation(): array
+    {
+        $query = [
+            'publishablePublish($INPUT)' => [
+                'userErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        $publications = $this->graphQL($this->dto->shopify, 'publications');
+        if (empty($publications)) {
+            throw new GraphQLRequestException('No publications available for Store');
+        }
+
+        $publication = $publications[0];
+
+        return [
+            'query' => ArrayGraphQL::convert(
+                $query,
+                ['$INPUT' => 'id: $id, input: {publicationId: $publicationId}'],
+                'mutation PublishProduct($id: ID!, $publicationId: ID!)'
+            ),
+            'variables' => [
+                'id' => Util::toGid($this->dto->findResourceIdInQueue('products'), 'Product'),
+                'publicationId' => Util::toGid(Arr::get($publication, 'id'), 'Publication'),
             ],
         ];
     }

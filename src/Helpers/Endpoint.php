@@ -145,6 +145,11 @@ abstract class Endpoint
         throw new GraphQLEnabledWithMissingQueriesException('Please override makeGraphQLQuery in child class');
     }
 
+    public function handleCallback(Shopify $shopify, RequestArgumentDTO $dto, array $response): array
+    {
+        throw new GraphQLEnabledWithMissingQueriesException('Callback not supported');
+    }
+
     protected function getPageInfoFields()
     {
         return [
@@ -205,5 +210,21 @@ abstract class Endpoint
     protected function getFiltersAndSortOrder(): string
     {
         return sprintf('%s %s', $this->getFilters(), $this->getSortOrder());
+    }
+
+    protected function graphQL(
+        Shopify $shopify,
+        ?string $resource = null,
+        $payload = null,
+        ?string $append = null,
+        bool $mutate = false,
+        array $appendToQueue = []
+    ) {
+        $shopify->api = $resource;
+        if (filled($appendToQueue)) {
+            $shopify->queue[] = $appendToQueue;
+        }
+
+        return $shopify->withGraphQL($payload, $append, $mutate);
     }
 }

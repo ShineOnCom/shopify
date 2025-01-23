@@ -4,12 +4,14 @@ namespace Dan\Shopify\DTOs;
 
 use Dan\Shopify\Exceptions\InvalidGraphQLCallException;
 use Dan\Shopify\Models\AbstractModel;
+use Dan\Shopify\Shopify;
 use Dan\Shopify\Util;
 use Illuminate\Support\Arr;
 
 final class RequestArgumentDTO
 {
     public function __construct(
+        public Shopify $shopify,
         public readonly bool $mutate = false,
         private $payload = null,
         private readonly array $queue = [],
