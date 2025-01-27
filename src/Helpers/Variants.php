@@ -179,17 +179,11 @@ class Variants extends Endpoint
     {
         $optionValues = [];
         foreach ([1, 2, 3] as $option) {
-            $nameKey = "option{$option}Name";
-            $valueKey = "option{$option}";
-
-            $value = Arr::get($variant, $valueKey);
-            $optionName = Arr::get($variant, $nameKey);
+            $value = Arr::get($variant, "option{$option}");
+            $optionName = Arr::get($variant, "option{$option}Name");
 
             if ($value && $optionName) {
-                $optionValues[] = [
-                    'optionName' => $optionName,
-                    'name' => $value,
-                ];
+                $optionValues[] = ['optionName' => $optionName, 'name' => $value];
             }
         }
 
