@@ -407,7 +407,7 @@ class Shopify
 
             if (isset($queryAndVariables['hasCallback'])) {
                 $callbackResponse = $this->{$this->api}->handleCallback($this, $dto, $response);
-                $response = array_merge($response, array_diff_key($callbackResponse, $response));
+                $response = array_merge($response, $callbackResponse);
             }
 
             return $response;

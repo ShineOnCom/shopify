@@ -29,7 +29,7 @@ class Products extends Endpoint
         $variantsResponse = $this->graphQL(
             $shopify,
             'variants',
-            Arr::get($dto->getPayload('product'), 'variants'),
+            $this->getVariantsPayload($dto),
             null,
             true,
             ['products', $response['id']]
@@ -45,6 +45,23 @@ class Products extends Endpoint
         );
 
         return ['variants' => $variantsResponse, 'publish' => $publishResponse];
+    }
+
+    private function getVariantsPayload(RequestArgumentDTO $dto)
+    {
+        $productOptions = Arr::get($dto->getPayload('product'), 'options');
+        $variants = Arr::get($dto->getPayload('product'), 'variants');
+
+        return array_map(function ($variant) use ($productOptions) {
+            foreach ([1, 2, 3] as $position) {
+                $option = Arr::where($productOptions, fn ($row) => (int) Arr::get($row, 'position') === $position);
+                if ($option) {
+                    $variant["option{$position}Name"] = $option[0]['name'];
+                }
+            }
+
+            return $variant;
+        }, $variants);
     }
 
     private function getFields()
@@ -247,15 +264,13 @@ class Products extends Endpoint
 
     private function formatOptionsVariableForMutation(&$variables): self
     {
-        if ($options = Arr::get($variables, 'options')) {
-            $options = is_array($options[0]) ? $options : [$options];
-            $options = array_map(function ($option) {
-                $option['values'] = array_map(fn ($value) => ['name' => $value], $option['values']);
-
-                return $option;
-            }, $options);
-
-            $variables['options'] = $options;
+        if (Arr::get($variables, 'options')) {
+            /**
+             * But if i don't pass options at all, well, the variants work anyway so i'm just gonna unset options
+             * https://shopify.dev/docs/apps/build/graphql/migrate/new-product-model/add-data
+             * https://community.shopify.com/c/products-variants-and/mutation-productoptionscreate-only-creates-one-option-value-per/m-p/2508643
+             */
+            unset($variables['options']);
         }
 
         return $this;
