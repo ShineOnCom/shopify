@@ -93,7 +93,7 @@ class Variant extends AbstractModel
 
         $row['id'] = (int) $row['id'];
         $row['admin_graphql_api_id'] = Util::toGid($row['id'], 'ProductVariant');
-        $row['product_id'] = $product_id;
+        $row['product_id'] = Arr::get($row, 'product.id', $product_id);
 
         $location = collect(Arr::get($row, 'inventory_item.inventory_levels'))->first();
 

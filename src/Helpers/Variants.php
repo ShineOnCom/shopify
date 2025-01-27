@@ -32,6 +32,9 @@ class Variants extends Endpoint
                 'name',
                 'value',
             ],
+            'product' => [
+                'id',
+            ],
             'inventoryItem' => [
                 'id',
                 'requiresShipping',
@@ -113,9 +116,7 @@ class Variants extends Endpoint
                 'product' => [
                     'id',
                 ],
-                'productVariants' => [
-                    'id',
-                ],
+                'productVariants' => $this->getFields(),
                 'userErrors' => [
                     'field',
                     'message',
@@ -126,7 +127,7 @@ class Variants extends Endpoint
         return [
             'query' => ArrayGraphQL::convert(
                 $query,
-                ['$INPUT' => 'productId: $productId, variants: $variants'],
+                ['$INPUT' => 'productId: $productId, variants: $variants', '$PER_PAGE' => 'first: 250'],
                 'mutation SaveVariants($productId: ID!, $variants: [ProductVariantsBulkInput!]!)'
             ),
             'variables' => $this->getVariables(),
@@ -147,6 +148,7 @@ class Variants extends Endpoint
 
         return [
             'productId' => Util::toGid($this->dto->findResourceIdInQueue('products'), 'Product'),
+            'strategy' => 'REMOVE_STANDALONE_VARIANT',
             'variants' => $variants,
         ];
     }
