@@ -32,6 +32,9 @@ class Variants extends Endpoint
                 'name',
                 'value',
             ],
+            'product' => [
+                'id',
+            ],
             'inventoryItem' => [
                 'id',
                 'requiresShipping',
