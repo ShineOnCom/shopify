@@ -127,8 +127,8 @@ class Variants extends Endpoint
         return [
             'query' => ArrayGraphQL::convert(
                 $query,
-                ['$INPUT' => 'productId: $productId, variants: $variants', '$PER_PAGE' => 'first: 250'],
-                'mutation SaveVariants($productId: ID!, $variants: [ProductVariantsBulkInput!]!)'
+                ['$INPUT' => 'productId: $productId, variants: $variants, strategy: $strategy', '$PER_PAGE' => 'first: 250'],
+                'mutation SaveVariants($productId: ID!, $strategy: ProductVariantsBulkCreateStrategy!, $variants: [ProductVariantsBulkInput!]!)'
             ),
             'variables' => $this->getVariables(),
         ];
