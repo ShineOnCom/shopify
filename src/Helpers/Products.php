@@ -55,8 +55,8 @@ class Products extends Endpoint
         return array_map(function ($variant) use ($productOptions) {
             foreach ([1, 2, 3] as $position) {
                 $option = Arr::where($productOptions, fn ($row) => (int) Arr::get($row, 'position') === $position);
-                if ($option) {
-                    $variant["option{$position}Name"] = $option[0]['name'];
+                if ($name = Arr::get($option, '0.name')) {
+                    $variant["option{$position}Name"] = $name;
                 }
             }
 
