@@ -182,9 +182,9 @@ class Variants extends Endpoint
             $nameKey = "option{$option}Name";
             $valueKey = "option{$option}";
 
-            if ($value = Arr::get($variant, $valueKey)) {
+            if ($value = Arr::get($variant, $valueKey) && $optionName = Arr::get($variant, $nameKey)) {
                 $optionValues[] = [
-                    'optionName' => $variant[$nameKey],
+                    'optionName' => $optionName,
                     'name' => $value,
                 ];
             }
