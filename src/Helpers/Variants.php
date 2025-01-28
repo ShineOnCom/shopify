@@ -102,6 +102,10 @@ class Variants extends Endpoint
 
     private function getMutation(): array
     {
+        if ($this->dto->hasResourceInQueue('delete')) {
+            return $this->getDeleteMutation();
+        }
+
         if ($this->dto->hasResourceInQueue('products')) {
             return $this->getMutationForProduct();
         }
@@ -223,5 +227,32 @@ class Variants extends Endpoint
         $variant['inventoryItem'] = $inventoryItem;
 
         return $this;
+    }
+
+    private function getDeleteMutation(): array
+    {
+        $query = [
+            'productVariantsBulkDelete($INPUT)' => [
+                'product' => [
+                    'id',
+                ],
+                'userErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        return [
+            'query' => ArrayGraphQL::convert(
+                $query,
+                ['$INPUT' => 'productId: $productId, variantsIds: $variantsIds'],
+                'mutation DeleteProductVariant($productId: ID!, $variantsIds: [ID!]!)'
+            ),
+            'variables' => [
+                'productId' => Util::toGid($this->dto->findResourceIdInQueue('products'), 'Product'),
+                'variantsIds' => [$this->dto->getResourceId('ProductVariant')],
+            ],
+        ];
     }
 }
