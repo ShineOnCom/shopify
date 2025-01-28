@@ -35,6 +35,11 @@ class Products extends Endpoint
             ['products', $response['id']]
         );
 
+        // If we are updating no need to publish to online store just skip
+        if ($dto->getResourceId()) {
+            return ['variants' => $variantsResponse];
+        }
+
         $publishResponse = $this->graphQL(
             $shopify,
             'products',
@@ -237,6 +242,7 @@ class Products extends Endpoint
     private function mapFields(&$variables): self
     {
         $variables = Util::mapFieldsForVariable([
+            'id' => 'id',
             'category' => 'category',
             'claimOwnership' => 'claimOwnership',
             'collectionsToJoin' => 'collectionsToJoin',
@@ -264,6 +270,13 @@ class Products extends Endpoint
 
     private function formatOptionsVariableForMutation(&$variables): self
     {
+        // product_options cannot be specified during update
+        if ($this->dto->getResourceId()) {
+            unset($variables['options']);
+
+            return $this;
+        }
+
         if ($options = Arr::get($variables, 'options')) {
             $options = array_map(function ($option) {
                 $option['values'] = array_map(fn ($value) => ['name' => $value], $option['values']);
@@ -324,7 +337,7 @@ class Products extends Endpoint
             throw new GraphQLRequestException('No publications available for Store');
         }
 
-        $publication = $publications[0];
+        $publication = Arr::first($publications);
 
         return [
             'query' => ArrayGraphQL::convert(
