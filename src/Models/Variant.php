@@ -82,6 +82,10 @@ class Variant extends AbstractModel
             return array_map(fn ($row) => $this->format($row), $variants);
         }
 
+        if ($variants = Arr::get($response, 'data.product_variants_bulk_delete')) {
+            return [];
+        }
+
         return self::format(Arr::get($response, 'data.node'));
     }
 
