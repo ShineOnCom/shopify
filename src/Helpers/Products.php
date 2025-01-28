@@ -49,8 +49,8 @@ class Products extends Endpoint
 
     private function getVariantsPayload(RequestArgumentDTO $dto)
     {
-        $productOptions = Arr::get($dto->getPayload('product'), 'options');
-        $variants = Arr::get($dto->getPayload('product'), 'variants');
+        $productOptions = Arr::get($dto->getPayload('product'), 'options', []);
+        $variants = Arr::get($dto->getPayload('product'), 'variants', []);
 
         return array_map(function ($variant) use ($productOptions) {
             foreach ([1, 2, 3] as $position) {
