@@ -115,6 +115,10 @@ class Variants extends Endpoint
 
     private function getMutationForProduct()
     {
+        if ($this->dto->getResourceId()) {
+            return $this->getUpdateMutationForProduct();
+        }
+
         $query = [
             'productVariantsBulkCreate($INPUT)' => [
                 'product' => [
@@ -138,11 +142,37 @@ class Variants extends Endpoint
         ];
     }
 
+    private function getUpdateMutationForProduct()
+    {
+        $query = [
+            'productVariantsBulkUpdate($INPUT)' => [
+                'product' => [
+                    'id',
+                ],
+                'productVariants' => $this->getFields(),
+                'userErrors' => [
+                    'field',
+                    'message',
+                ],
+            ],
+        ];
+
+        return [
+            'query' => ArrayGraphQL::convert(
+                $query,
+                ['$INPUT' => 'productId: $productId, variants: $variants', '$PER_PAGE' => 'first: 250'],
+                'mutation SaveVariants($productId: ID!, $variants: [ProductVariantsBulkInput!]!)'
+            ),
+            'variables' => $this->getVariables(),
+        ];
+    }
+
     private function getVariables(): array
     {
-        $variants = $this->dto->getPayload('variant');
+        $variants = Util::toMultiDimensionalArray($this->dto->getPayload('variant'));
         $variants = array_map(function ($variant) {
             $this
+                ->formatIdVariableForMutation($variant)
                 ->formatInventoryItemVariableForMutation($variant)
                 ->formatOptionValuesVariableForMutation($variant)
                 ->mapFields($variant);
@@ -225,6 +255,15 @@ class Variants extends Endpoint
         }
 
         $variant['inventoryItem'] = $inventoryItem;
+
+        return $this;
+    }
+
+    private function formatIdVariableForMutation(&$variant): self
+    {
+        if ($id = Arr::get($variant, 'id')) {
+            $variant['id'] = Util::toGid($id, 'ProductVariant');
+        }
 
         return $this;
     }

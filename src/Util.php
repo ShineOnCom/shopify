@@ -387,4 +387,13 @@ class Util
 
         return $variables;
     }
+
+    public static function toMultiDimensionalArray(?array $array)
+    {
+        if (! $array) {
+            return [];
+        }
+
+        return is_array(Arr::first($array)) ? $array : [$array];
+    }
 }
