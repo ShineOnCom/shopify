@@ -37,7 +37,11 @@ class Products extends Endpoint
 
         // If we are updating no need to publish to online store just skip
         if ($dto->getResourceId()) {
-            return ['variants' => $variantsResponse];
+            if (filled($variantsResponse)) {
+                return ['variants' => $variantsResponse];
+            }
+
+            return [];
         }
 
         $publishResponse = $this->graphQL(
