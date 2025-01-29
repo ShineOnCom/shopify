@@ -224,8 +224,9 @@ class Variants extends Endpoint
         if (filled($optionValues)) {
             $variant['optionValues'] = $optionValues;
         } else {
+            $default = sprintf('Default Title - %s', time());
             $variant['optionValues'] = [
-                ['optionName' => 'Title', 'name' => Arr::get($variant, 'title', 'Default Title')],
+                ['optionName' => 'Title', 'name' => Arr::get($variant, 'option1', Arr::get($variant, 'title', $default))],
             ];
         }
 
