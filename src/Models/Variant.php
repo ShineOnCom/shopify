@@ -108,7 +108,7 @@ class Variant extends AbstractModel
         $row['image_id'] = null;
         $row['old_inventory_quantity'] = null;
         $row['barcode'] = null;
-        $row['compare_at_price'] = null;
+        $row['compare_at_price'] = Arr::get($row, 'compare_at_price');
         $row['created_at'] = null;
         $row['fulfillment_service'] = null;
         $row['inventory_policy'] = null;
