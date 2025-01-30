@@ -235,17 +235,19 @@ class Variants extends Endpoint
 
     private function formatInventoryItemVariableForMutation(&$variant): self
     {
+        if (! isset($variant['locationId'])) {
+            throw new GraphQLEnabledWithMissingQueriesException('location_id must be set in the variants Array');
+        }
+
         $inventoryItem = ['tracked' => false];
 
         if (isset($variant['requiresShipping'])) {
             $inventoryItem['requiresShipping'] = $variant['requiresShipping'];
         }
 
-        if (isset($variant['locationId'])) {
-            $variant['inventoryQuantities'] = [
-                ['availableQuantity' => 1000000, 'locationId' => Util::toGid($variant['locationId'], 'Location')],
-            ];
-        }
+        $variant['inventoryQuantities'] = [
+            ['availableQuantity' => 1000000, 'locationId' => Util::toGid($variant['locationId'], 'Location')],
+        ];
 
         if (isset($variant['sku'])) {
             $inventoryItem['sku'] = $variant['sku'];

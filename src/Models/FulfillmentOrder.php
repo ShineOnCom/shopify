@@ -18,7 +18,7 @@ class FulfillmentOrder extends AbstractModel
         $response = Util::convertKeysToSnakeCase($response);
         $data = Arr::get($response, 'data');
         $fulfillment_orders = Arr::get($data, 'order.fulfillment_orders');
-        if (! $fulfillment_orders) {
+        if (! is_array($fulfillment_orders)) {
             $fulfillment_order_key = Arr::get($data, 'fulfillment_order')
                 ? 'fulfillment_order'
                 : sprintf('%s.fulfillment_order', array_key_first($data));

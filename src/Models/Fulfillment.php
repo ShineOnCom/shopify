@@ -60,9 +60,6 @@ class Fulfillment extends AbstractModel
         'admin_graphql_api_id' => 'string',
     ];
 
-    /**
-     * @return ?array
-     */
     public function transformGraphQLResponse(array $response): ?array
     {
         $response = Util::convertKeysToSnakeCase($response);
