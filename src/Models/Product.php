@@ -101,7 +101,7 @@ class Product extends AbstractModel
         return $this->format($product);
     }
 
-    public function format(array $row)
+    public function format(?array $row)
     {
         if (blank($row)) {
             return [];

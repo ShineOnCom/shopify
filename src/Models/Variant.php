@@ -89,7 +89,7 @@ class Variant extends AbstractModel
         return self::format(Arr::get($response, 'data.node', []));
     }
 
-    public static function format(array $row, int $product_id = 0)
+    public static function format(?array $row, int $product_id = 0)
     {
         if (blank($row)) {
             return [];
