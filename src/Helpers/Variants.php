@@ -175,6 +175,7 @@ class Variants extends Endpoint
                 ->formatIdVariableForMutation($variant)
                 ->formatInventoryItemVariableForMutation($variant)
                 ->formatOptionValuesVariableForMutation($variant)
+                ->formatMetaFieldsVariableForMutation($variant)
                 ->mapFields($variant);
 
             return $variant;
@@ -223,11 +224,28 @@ class Variants extends Endpoint
 
         if (filled($optionValues)) {
             $variant['optionValues'] = $optionValues;
-        } else {
+        } elseif (! $this->dto->getResourceId()) {
             $default = sprintf('Default Title - %s', time());
             $variant['optionValues'] = [
                 ['optionName' => 'Title', 'name' => Arr::get($variant, 'option1', Arr::get($variant, 'title', $default))],
             ];
+        } else {
+            unset($variant['optionValues']);
+        }
+
+        return $this;
+    }
+
+    private function formatMetaFieldsVariableForMutation(&$variables): self
+    {
+        if ($metaFields = Arr::get($variables, 'metafields')) {
+            $metaFields = array_map(function ($row) {
+                $row['value'] = (string) $row['value'];
+
+                return $row;
+            }, $metaFields);
+
+            $variables['metafields'] = $metaFields;
         }
 
         return $this;
@@ -235,7 +253,7 @@ class Variants extends Endpoint
 
     private function formatInventoryItemVariableForMutation(&$variant): self
     {
-        if (! isset($variant['locationId'])) {
+        if (! isset($variant['id']) && ! isset($variant['locationId'])) {
             throw new GraphQLEnabledWithMissingQueriesException('location_id must be set in the variants Array');
         }
 
@@ -245,9 +263,11 @@ class Variants extends Endpoint
             $inventoryItem['requiresShipping'] = $variant['requiresShipping'];
         }
 
-        $variant['inventoryQuantities'] = [
-            ['availableQuantity' => 1000000, 'locationId' => Util::toGid($variant['locationId'], 'Location')],
-        ];
+        if (isset($variant['locationId'])) {
+            $variant['inventoryQuantities'] = [
+                ['availableQuantity' => 1000000, 'locationId' => Util::toGid($variant['locationId'], 'Location')],
+            ];
+        }
 
         if (isset($variant['sku'])) {
             $inventoryItem['sku'] = $variant['sku'];

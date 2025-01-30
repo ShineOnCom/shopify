@@ -238,6 +238,7 @@ class Products extends Endpoint
         $this
             ->formatOptionsVariableForMutation($variables)
             ->formatStatusVariableForMutation($variables)
+            ->formatMetaFieldsVariableForMutation($variables)
             ->mapFields($variables);
 
         return $variables;
@@ -297,6 +298,21 @@ class Products extends Endpoint
     private function formatStatusVariableForMutation(&$variables): self
     {
         $variables['status'] = 'ACTIVE';
+
+        return $this;
+    }
+
+    private function formatMetaFieldsVariableForMutation(&$variables): self
+    {
+        if ($metaFields = Arr::get($variables, 'metafields')) {
+            $metaFields = array_map(function ($row) {
+                $row['value'] = (string) $row['value'];
+
+                return $row;
+            }, $metaFields);
+
+            $variables['metafields'] = $metaFields;
+        }
 
         return $this;
     }
