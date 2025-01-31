@@ -434,6 +434,8 @@ class Shopify
 
         $api = $this->api;
 
+        $this->log_rest_requests();
+
         // Don't allow use of page query on cursored endpoints
         if (isset($query['page']) && in_array($api, static::$cursored_enpoints, true)) {
             static::log('log_deprecation_warnings', ['Use of deprecated query parameter. Use cursor navigation instead.']);
@@ -585,6 +587,8 @@ class Shopify
         $api = $this->api;
         $uri = $this->uri($append);
 
+        $this->log_rest_requests();
+
         $json = $payload instanceof AbstractModel
             ? $payload->getPayload()
             : $payload;
@@ -626,6 +630,8 @@ class Shopify
 
             return $this->withGraphQL($query, null, true);
         }
+
+        $this->log_rest_requests();
 
         $response = $this->request(
             $method = 'DELETE',
@@ -733,6 +739,7 @@ class Shopify
         $id = $model->getAttribute($model::$identifier);
 
         $this->api = $model::$resource_name_many;
+        $this->log_rest_requests();
 
         $response = $this->request(
             $method = $id ? 'PUT' : 'POST',
@@ -1111,5 +1118,10 @@ class Shopify
                     \Log::info($message, $context);
             }
         }
+    }
+
+    private function log_rest_requests()
+    {
+        \Log::warning("vendor:dan:shopify:rest:{$this->api}", ['shop' => $this->shop]);
     }
 }
