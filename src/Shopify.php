@@ -1092,8 +1092,7 @@ class Shopify
 
     private static function log(string $type = 'log_api_request_data', ?array $context = [])
     {
-        $enabled = Util::isLaravel() && config(sprintf('shopify.options.%s', $type));
-        if ($enabled || self::$graphql_pilot_enabled) {
+        if (config(sprintf('shopify.options.%s', $type))) {
             $message = match ($type) {
                 'log_api_request_data' => 'vendor:dan:shopify:api:request',
                 'log_api_response_data' => 'vendor:dan:shopify:api:response',
