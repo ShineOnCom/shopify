@@ -52,6 +52,9 @@ final class RequestArgumentDTO
         return null;
     }
 
+    /**
+     * @throws InvalidGraphQLCallException
+     */
     public function findResourceIdInQueue(string $resource)
     {
         foreach ($this->queue as $row) {
