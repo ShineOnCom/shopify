@@ -1122,6 +1122,6 @@ class Shopify
 
     private function log_rest_requests()
     {
-        \Log::warning("vendor:dan:shopify:rest:{$this->api}", ['shop' => $this->shop]);
+        // \Log::warning("vendor:dan:shopify:rest:{$this->api}", ['shop' => $this->shop]);
     }
 }
