@@ -257,6 +257,10 @@ class Variants extends Endpoint
             throw new GraphQLEnabledWithMissingQueriesException('location_id must be set in the variants Array');
         }
 
+        if (isset($variant['id']) && isset($variant['locationId'])) {
+            unset($variant['locationId']);
+        }
+
         $inventoryItem = ['tracked' => false];
 
         if (isset($variant['requiresShipping'])) {
