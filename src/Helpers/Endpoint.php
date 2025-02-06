@@ -124,7 +124,7 @@ abstract class Endpoint
 
     public static function useGraphQL(string $endpoint): bool
     {
-        return (int) config(sprintf('shopify.endpoints.%s', $endpoint)) === 1;
+        return (int) config('shopify.endpoints.'.$endpoint) === 1;
     }
 
     /**
