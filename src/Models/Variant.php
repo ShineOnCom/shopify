@@ -105,7 +105,7 @@ class Variant extends AbstractModel
         $row['inventory_item_id'] = (int) Util::getIdFromGid(Arr::get($row, 'inventory_item.id'));
         $row['inventory_management'] = null;
         $row['grams'] = 0;
-        $row['image_id'] = null;
+        $row['image_id'] = Arr::get($row, 'image.id');
         $row['old_inventory_quantity'] = null;
         $row['barcode'] = null;
         $row['compare_at_price'] = Arr::get($row, 'compare_at_price');

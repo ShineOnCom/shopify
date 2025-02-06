@@ -62,6 +62,7 @@ class Variants extends Endpoint
             'id',
             'image' => [
                 'id',
+                'url',
             ],
             'inventoryPolicy',
             'inventoryQuantity',

@@ -110,6 +110,20 @@ class Products extends Endpoint
                     ],
                 ],
             ],
+            'media($PER_PAGE)' => [
+                'edges' => [
+                    'node' => [
+                        '... on MediaImage' => [
+                            'id',
+                            'image' => [
+                                'id',
+                                'url',
+                                'altText',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 
