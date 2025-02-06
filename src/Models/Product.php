@@ -109,21 +109,6 @@ class Product extends AbstractModel
 
         $product_id = (int) $row['id'];
 
-        $position = 1;
-        $images = array_map(function ($image) use ($product_id, $position) {
-            $image['id'] = (int) $image['id'];
-            $image['admin_graphql_api_id'] = Util::toGid($image['id'], 'ProductImage');
-            $image['product_id'] = $product_id;
-            $image['alt'] = $image['alt_text'];
-            $image['position'] = $position++;
-            $image['created_at'] = null;
-            $image['updated_at'] = null;
-            $image['published_scope'] = 'web';
-            $image['variant_ids'] = [];
-
-            return $image;
-        }, Arr::get($row, 'images', []));
-
         $options = array_map(function ($option) use ($product_id) {
             $option['id'] = (int) $option['id'];
             $option['product_id'] = $product_id;
@@ -138,15 +123,37 @@ class Product extends AbstractModel
             return $variant;
         }, Arr::get($row, 'variants', []));
 
+        $images = $this->formatImages($product_id, $variants, Arr::get($row, 'images', []));
+
         $row['id'] = $product_id;
         $row['admin_graphql_api_id'] = Util::toGid($row['id'], 'Product');
         $row['options'] = $options;
         $row['images'] = $images;
         $row['variants'] = $variants;
         $row['image'] = array_first($images) ?? [];
-        $row['image']['variant_ids'] = array_map(fn ($variant) => $variant['id'], $variants);
         $row['tags'] = implode(',', Arr::get($row, 'tags', []));
 
         return $row;
+    }
+
+    private function formatImages(int $product_id, array $variants, array $images): array
+    {
+        $position = 1;
+        foreach ($images as &$image) {
+            $image['id'] = (int) $image['id'];
+            $image['admin_graphql_api_id'] = Util::toGid($image['id'], 'ProductImage');
+            $image['product_id'] = $product_id;
+            $image['alt'] = $image['alt_text'];
+            $image['position'] = $position++;
+            $image['created_at'] = null;
+            $image['updated_at'] = null;
+            $image['published_scope'] = 'web';
+            $image['variant_ids'] = collect($variants)
+                ->filter(fn ($row) => Arr::get($row, 'image.url') === $image['src'])
+                ->map(fn ($row) => $row['id'])
+                ->all();
+        }
+
+        return $images;
     }
 }
