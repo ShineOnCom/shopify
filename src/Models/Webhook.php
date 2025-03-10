@@ -2,6 +2,9 @@
 
 namespace Dan\Shopify\Models;
 
+use Dan\Shopify\Util;
+use Illuminate\Support\Arr;
+
 /**
  * Class Webhook.
  *
@@ -187,4 +190,37 @@ class Webhook extends AbstractModel
         self::THEMES_PUBLISH,
         self::THEMES_UPDATE,
     ];
+
+
+
+
+    /**
+     * @return ?array
+     */
+    public function transformGraphQLResponse(array $response): ?array
+    {
+        $response = Util::convertKeysToSnakeCase($response);
+
+        if ($data = Arr::get($response, 'data.webhook_subscriptions')){
+
+            return array_map(fn ($row) => $this->transformWebhookSubscription($row), $data);
+        }
+
+        $data = Arr::get($response, 'data.webhook_subscription');
+
+        return $this->transformWebhookSubscription($data);
+    }
+
+    private function transformWebhookSubscription(?array $row = null)
+    {
+        if (! $row) {
+            return $row;
+        }
+
+        $row['address'] = $row['callback_url'];
+        $row['fields'] = $row['include_fields'];
+        $row['api_version'] = $row['api_version']['display_name'];
+
+        return $row;
+    }
 }
