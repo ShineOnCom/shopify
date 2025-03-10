@@ -262,6 +262,11 @@ class Variants extends Endpoint
             unset($variant['locationId']);
         }
 
+        $requiresShipping = isset($variant['requiresShipping']) && (bool) $variant['requiresShipping'];
+        if ($requiresShipping === false) {
+            unset($variant['locationId']);
+        }
+
         $inventoryItem = ['tracked' => false];
 
         if (isset($variant['requiresShipping'])) {
