@@ -123,7 +123,7 @@ return [
         'disputes' => (int) env('SHOPIFY_ENDPOINT_DISPUTES_USE_GRAPHQL', 0),
         'fulfillments' => (int) env('SHOPIFY_ENDPOINT_FULFILLMENTS_USE_GRAPHQL', 0),
         'fulfillment_orders' => (int) env('SHOPIFY_ENDPOINT_FULFILLMENT_ORDERS_USE_GRAPHQL', 0),
-        'fulfillment_services' => (int) env('SHOPIFY_ENDPOINT_FULFILLMENT_SERVICES_USE_GRAPHQL', 1),
+        'fulfillment_services' => (int) env('SHOPIFY_ENDPOINT_FULFILLMENT_SERVICES_USE_GRAPHQL', 0),
         'images' => (int) env('SHOPIFY_ENDPOINT_IMAGES_USE_GRAPHQL', 0),
         'metafields' => (int) env('SHOPIFY_ENDPOINT_METAFIELDS_USE_GRAPHQL', 0),
         'orders' => (int) env('SHOPIFY_ENDPOINT_ORDERS_USE_GRAPHQL', 0),
