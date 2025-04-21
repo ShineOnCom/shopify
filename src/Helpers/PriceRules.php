@@ -14,7 +14,7 @@ class PriceRules extends Endpoint
     public function ensureGraphQLSupport(): void
     {
         if ($this->graphQLEnabled()) {
-            throw new GraphQLEnabledWithMissingQueriesException();
+            throw new GraphQLEnabledWithMissingQueriesException;
         }
     }
 }

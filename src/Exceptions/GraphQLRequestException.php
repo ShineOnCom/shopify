@@ -7,6 +7,4 @@ use Exception;
 /**
  * Class GraphQLRequestException.
  */
-class GraphQLRequestException extends Exception
-{
-}
+class GraphQLRequestException extends Exception {}

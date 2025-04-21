@@ -3,7 +3,6 @@
 namespace Dan\Shopify\Helpers;
 
 use Dan\Shopify\ArrayGraphQL;
-use Dan\Shopify\Exceptions\GraphQLEnabledWithMissingQueriesException;
 use Dan\Shopify\Exceptions\InvalidGraphQLCallException;
 use Dan\Shopify\Util;
 
@@ -154,7 +153,7 @@ class Webhooks extends Endpoint
     }
 
     private function getMutation(): array
-     {
+    {
         if ($this->dto->payload) {
             return $this->createWebhook();
         }

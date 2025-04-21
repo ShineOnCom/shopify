@@ -191,17 +191,11 @@ class Webhook extends AbstractModel
         self::THEMES_UPDATE,
     ];
 
-
-
-
-    /**
-     * @return ?array
-     */
     public function transformGraphQLResponse(array $response): ?array
     {
         $response = Util::convertKeysToSnakeCase($response);
 
-        if ($data = Arr::get($response, 'data.webhook_subscriptions')){
+        if ($data = Arr::get($response, 'data.webhook_subscriptions')) {
 
             return array_map(fn ($row) => $this->transformWebhookSubscription($row), $data);
         }
