@@ -7,6 +7,4 @@ use Exception;
 /**
  * Class InvalidOrMissingEndpointException.
  */
-class InvalidOrMissingEndpointException extends Exception
-{
-}
+class InvalidOrMissingEndpointException extends Exception {}

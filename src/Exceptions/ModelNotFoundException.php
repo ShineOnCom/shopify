@@ -7,6 +7,4 @@ use Exception;
 /**
  * Class ModelNotFoundException.
  */
-class ModelNotFoundException extends Exception
-{
-}
+class ModelNotFoundException extends Exception {}
