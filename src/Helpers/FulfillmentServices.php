@@ -4,6 +4,7 @@ namespace Dan\Shopify\Helpers;
 
 use Dan\Shopify\ArrayGraphQL;
 use Dan\Shopify\Util;
+use Illuminate\Support\Arr;
 
 /**
  * Class FulfillmentServices.
@@ -89,9 +90,9 @@ class FulfillmentServices extends Endpoint
         $query = ArrayGraphQL::convert(
             $query,
             [
-                '$INPUT' => 'name: $name, callbackUrl: $callbackUrl, inventoryManagement: $inventoryManagement, trackingSupport: $trackingSupport',
+                '$INPUT' => 'name: $name, callbackUrl: $callbackUrl, inventoryManagement: $inventoryManagement, trackingSupport: $trackingSupport, permitsSkuSharing: $permitsSkuSharing',
             ],
-            'mutation CreateFulfillmentService($name: String!, $callbackUrl: URL!, $inventoryManagement: Boolean!, $trackingSupport: Boolean!)'
+            'mutation CreateFulfillmentService($name: String!, $callbackUrl: URL!, $inventoryManagement: Boolean!, $trackingSupport: Boolean!, $permitsSkuSharing: Boolean!)'
         );
 
         return [
@@ -120,6 +121,7 @@ class FulfillmentServices extends Endpoint
             'callbackUrl' => $payload['callback_url'],
             'inventoryManagement' => $payload['inventory_management'],
             'trackingSupport' => $payload['tracking_support'],
+            'permitsSkuSharing' => Arr::get($payload, 'permits_sku_sharing', true),
         ];
 
         $query = ArrayGraphQL::convert(
