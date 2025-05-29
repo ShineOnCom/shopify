@@ -114,9 +114,23 @@ class Variants extends Endpoint
         throw new GraphQLEnabledWithMissingQueriesException('Mutation not supported directly. Please use products');
     }
 
+    private function shouldUpdate(): bool
+    {
+        if (($variants = $this->dto->getPayload('variant')) && is_array($variants) && count($variants) > 0 && isset($variants[0]['create'])) {
+            return false;
+        }
+
+        return $this->dto->getResourceId();
+    }
+
+    private function shouldCreate(): bool
+    {
+        return ! $this->shouldUpdate();
+    }
+
     private function getMutationForProduct()
     {
-        if ($this->dto->getResourceId()) {
+        if ($this->shouldUpdate()) {
             return $this->getUpdateMutationForProduct();
         }
 
@@ -225,7 +239,7 @@ class Variants extends Endpoint
 
         if (filled($optionValues)) {
             $variant['optionValues'] = $optionValues;
-        } elseif (! $this->dto->getResourceId()) {
+        } elseif ($this->shouldCreate()) {
             $default = sprintf('Default Title - %s', time());
             $variant['optionValues'] = [
                 ['optionName' => 'Title', 'name' => Arr::get($variant, 'option1', Arr::get($variant, 'title', $default))],
