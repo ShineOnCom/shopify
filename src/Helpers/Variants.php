@@ -120,7 +120,7 @@ class Variants extends Endpoint
             return false;
         }
 
-        return $this->dto->getResourceId();
+        return (bool) $this->dto->getResourceId();
     }
 
     private function shouldCreate(): bool
