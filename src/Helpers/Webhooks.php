@@ -35,7 +35,7 @@ class Webhooks extends Endpoint
             'apiVersion' => [
                 'displayName',
             ],
-            'privateMetafieldNamespaces',
+            // 'privateMetafieldNamespaces', Use: https://shopify.dev/docs/apps/build/custom-data/ownership#app-data-metafields if this is ever needed
         ];
     }
 
