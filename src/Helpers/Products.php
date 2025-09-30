@@ -26,14 +26,18 @@ class Products extends Endpoint
 
     public function handleCallback(Shopify $shopify, RequestArgumentDTO $dto, array $response): array
     {
-        $variantsResponse = $this->graphQL(
-            $shopify,
-            'variants',
-            $this->getVariantsPayload($dto),
-            null,
-            true,
-            ['products', $response['id']]
-        );
+        $variantsResponse = [];
+        $variantsPayload = $this->getVariantsPayload($dto);
+        if (filled($variantsPayload)) {
+            $variantsResponse = $this->graphQL(
+                $shopify,
+                'variants',
+                $variantsPayload,
+                null,
+                true,
+                ['products', $response['id']]
+            );
+        }
 
         // If we are updating no need to publish to online store just skip
         if ($dto->getResourceId()) {
