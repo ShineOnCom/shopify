@@ -246,8 +246,6 @@ class Products extends Endpoint
 
     private function getVariables(): array
     {
-        $variables = [];
-
         $variables = Util::convertKeysToCamelCase($this->dto->getPayload('product'));
         if ($this->dto->getResourceId()) {
             $variables['id'] = $this->dto->getResourceId('Product');
@@ -258,6 +256,10 @@ class Products extends Endpoint
             ->formatStatusVariableForMutation($variables)
             ->formatMetaFieldsVariableForMutation($variables)
             ->mapFields($variables);
+
+        if (app()->hasMacro('recordCustomEvent')) {
+            app()->recordCustomEvent('ShopifyGraphQLPayload', $variables + ['url' => request()->fullUrl()]);
+        }
 
         return $variables;
     }
