@@ -147,7 +147,7 @@ class Products extends Endpoint
     private function getProductsCount()
     {
         $filters = $this->getFilters();
-        $header = $filters ? 'productsCount($FILTERS)' : 'productsCount';
+        $header = $filters ? 'productsCount($FILTERS, $LIMIT)' : 'productsCount($LIMIT)';
 
         $fields = [
             $header => [
@@ -157,7 +157,7 @@ class Products extends Endpoint
         ];
 
         return [
-            'query' => ArrayGraphQL::convert($fields, ['$FILTERS' => $filters]),
+            'query' => ArrayGraphQL::convert($fields, ['$FILTERS' => $filters, '$LIMIT' => 'limit: null']),
             'variables' => null,
         ];
     }
