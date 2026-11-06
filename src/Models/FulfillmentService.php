@@ -80,7 +80,6 @@ class FulfillmentService extends AbstractModel
             'callback_url' => $row['callback_url'],
             'tracking_support' => null,
             'inventory_management' => $row['inventory_management'],
-            'permits_sku_sharing' => $row['permits_sku_sharing'],
             'requires_shipping_method' => null,
         ];
     }
